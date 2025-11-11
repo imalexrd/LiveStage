@@ -27,6 +27,11 @@ $logout = function (Logout $logout) {
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    @if(auth()->user()->role == 'manager')
+                        <x-nav-link :href="route('musician.profile')" :active="request()->routeIs('musician.profile')" wire:navigate>
+                            {{ __('Musician Profile') }}
+                        </x-nav-link>
+                    @endif
                 </div>
             </div>
 
@@ -78,6 +83,11 @@ $logout = function (Logout $logout) {
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            @if(auth()->user()->role == 'manager')
+                <x-responsive-nav-link :href="route('musician.profile')" :active="request()->routeIs('musician.profile')" wire:navigate>
+                    {{ __('Musician Profile') }}
+                </x-responsive-nav-link>
+            @endif
         </div>
 
         <!-- Responsive Settings Options -->

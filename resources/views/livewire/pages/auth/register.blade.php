@@ -16,13 +16,15 @@ state([
     'name' => '',
     'email' => '',
     'password' => '',
-    'password_confirmation' => ''
+    'password_confirmation' => '',
+    'role' => 'client'
 ]);
 
 rules([
     'name' => ['required', 'string', 'max:255'],
     'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
     'password' => ['required', 'string', 'confirmed', Rules\Password::defaults()],
+    'role' => ['required', 'string', 'in:client,manager'],
 ]);
 
 $register = function () {
@@ -30,11 +32,18 @@ $register = function () {
 
     $validated['password'] = Hash::make($validated['password']);
 
-    event(new Registered($user = User::create($validated)));
+    $user = User::create([
+        'name' => $validated['name'],
+        'email' => $validated['email'],
+        'password' => $validated['password'],
+        'role' => $validated['role'],
+    ]);
+
+    event(new Registered($user));
 
     Auth::login($user);
 
-    $this->redirect(route('dashboard', absolute: false), navigate: true);
+    return redirect()->route('dashboard');
 };
 
 ?>
@@ -76,6 +85,22 @@ $register = function () {
                             name="password_confirmation" required autocomplete="new-password" />
 
             <x-input-error :messages="$errors->get('password_confirmation')" class="mt-2" />
+        </div>
+
+        <!-- Role -->
+        <div class="mt-4">
+            <x-input-label :value="__('Register as:')" />
+            <div class="mt-2">
+                <label class="inline-flex items-center">
+                    <input type="radio" wire:model="role" name="role" value="client" class="form-radio">
+                    <span class="ms-2">{{ __('Client') }}</span>
+                </label>
+                <label class="inline-flex items-center ms-6">
+                    <input type="radio" wire:model="role" name="role" value="manager" class="form-radio">
+                    <span class="ms-2">{{ __('Manager') }}</span>
+                </label>
+            </div>
+            <x-input-error :messages="$errors->get('role')" class="mt-2" />
         </div>
 
         <div class="flex items-center justify-end mt-4">
