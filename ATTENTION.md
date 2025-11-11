@@ -2,7 +2,7 @@
 
 ## Foco Principal
 
-El foco principal del equipo en este momento es completar el **Hito 1: Sistema de Autenticación y Entorno Base**. El objetivo es establecer una base de código Laravel robusta, con un sistema de autenticación dual (correo/contraseña y OAuth con Google) funcional y una documentación clara para facilitar la incorporación de nuevos desarrolladores.
+El foco principal del equipo en este momento es completar el **Hito 2: Gestión de Perfiles de Músico y Aprobación de Administrador**. El objetivo es implementar la funcionalidad principal para los roles de `Manager` y `Admin`, permitiendo la creación, gestión y aprobación de perfiles de artistas.
 
 ## Guía de Instalación y Replicación
 
@@ -64,10 +64,17 @@ php artisan migrate:fresh --seed
 ### 3. Base de Datos de Prueba
 
 Después de ejecutar los seeders, la base de datos contendrá tres usuarios de prueba. Puedes iniciar sesión con las siguientes credenciales:
-- **Email:** `test1@example.com` / `test2@example.com` / `test3@example.com`
-- **Contraseña:** `password`
+- **Admin:** `admin@example.com` / `password`
+- **Manager:** `manager@example.com` / `password`
+- **Client:** `client@example.com` / `password`
 
 ## Notas y Contexto para el Futuro
+
+### Decisiones Técnicas del Hito 2
+
+- **Gestión de Perfiles de Músico:** Se ha implementado un flujo completo para que los usuarios con el rol de `manager` puedan crear y editar sus perfiles de músico. Esto incluye un nuevo modelo `MusicianProfile` con una relación uno a uno con el modelo `User`, y una página dedicada para la gestión del perfil.
+- **Panel de Administración:** Se ha instalado y configurado **FilamentPHP** para crear un panel de administración interno. Este panel permite a los usuarios con el rol de `admin` revisar y aprobar los perfiles de los músicos.
+- **Autorización:** Se ha implementado un sistema de autorización basado en roles. El acceso a la página de gestión de perfiles de músico está restringido a los `managers`, y el panel de administración de Filament está restringido a los `admins`.
 
 ### Decisiones Técnicas del Hito 1
 
