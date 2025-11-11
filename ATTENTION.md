@@ -1,0 +1,77 @@
+# ATTENTION.md
+
+## Foco Principal
+
+El foco principal del equipo en este momento es completar el **Hito 1: Sistema de Autenticación y Entorno Base**. El objetivo es establecer una base de código Laravel robusta, con un sistema de autenticación dual (correo/contraseña y OAuth con Google) funcional y una documentación clara para facilitar la incorporación de nuevos desarrolladores.
+
+## Guía de Instalación y Replicación
+
+### 1. Dependencias del Entorno
+
+Antes de instalar el proyecto, es necesario asegurarse de que el entorno de desarrollo cumple con los siguientes requisitos. Los siguientes comandos son para un sistema basado en Ubuntu:
+
+```bash
+# Actualizar la lista de paquetes
+sudo apt-get update
+
+# Instalar PHP 8.3 y extensiones necesarias
+sudo apt-get install -y php8.3 php8.3-pgsql php8.3-zip php8.3-xml php8.3-curl php8.3-mbstring
+
+# Instalar Composer
+sudo apt-get install -y composer
+
+# Instalar PostgreSQL
+sudo apt-get install -y postgresql postgresql-contrib
+```
+
+### 2. Instalación del Proyecto
+
+Una vez que las dependencias del entorno estén instaladas, sigue estos pasos para poner en marcha el proyecto:
+
+```bash
+# 1. Clona el repositorio (si aún no lo has hecho)
+git clone <URL_DEL_REPOSITORIO>
+cd <NOMBRE_DEL_DIRECTORIO>
+
+# 2. Instala las dependencias de Composer
+composer install
+
+# 3. Instala las dependencias de NPM
+npm install
+
+# 4. Compila los assets del frontend
+npm run build
+
+# 5. Crea tu archivo de entorno a partir del ejemplo
+cp .env.example .env
+
+# 6. Genera la clave de la aplicación
+php artisan key:generate
+
+# 7. Configura tu base de datos en el archivo .env
+# Asegúrate de que las variables DB_DATABASE, DB_USERNAME y DB_PASSWORD
+# coincidan con tu configuración de PostgreSQL.
+
+# 8. Configura las credenciales de Google OAuth en .env
+# Añade tu Client ID y Client Secret de Google.
+# GOOGLE_CLIENT_ID=
+# GOOGLE_CLIENT_SECRET=
+
+# 9. Ejecuta las migraciones y los seeders para poblar la base de datos
+php artisan migrate:fresh --seed
+```
+
+### 3. Base de Datos de Prueba
+
+Después de ejecutar los seeders, la base de datos contendrá tres usuarios de prueba. Puedes iniciar sesión con las siguientes credenciales:
+- **Email:** `test1@example.com` / `test2@example.com` / `test3@example.com`
+- **Contraseña:** `password`
+
+## Notas y Contexto para el Futuro
+
+### Decisiones Técnicas del Hito 1
+
+- **Framework y Starter Kit:** Se ha utilizado **Laravel 11+** como framework principal. Para la autenticación estándar, se ha implementado **Laravel Breeze** con el stack **TALL (Livewire)**. Esta elección acelera el desarrollo del frontend al permitir construir interfaces reactivas directamente con PHP.
+- **Autenticación OAuth:** Se ha integrado **Laravel Socialite** para manejar el inicio de sesión con proveedores externos. El primer proveedor implementado es Google, sentando las bases para añadir otros en el futuro.
+- **Base de Datos:** Se ha seleccionado **PostgreSQL** como motor de base de datos, siguiendo las especificaciones del proyecto. La configuración del entorno local está documentada en esta guía.
+- **Datos de Prueba:** Se ha creado un `UserSeeder` para facilitar las pruebas de desarrollo, evitando la necesidad de registrar usuarios manualmente cada vez que se refresca la base de datos.
