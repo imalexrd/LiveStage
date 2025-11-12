@@ -1,29 +1,34 @@
-# Hito 4: Sistema de Reservaciones Básico
+# Hito 4: Perfiles de Músico Enriquecidos
 
 ## 1. Contexto General
 
-Con los perfiles de músicos visibles y accesibles, el siguiente paso es permitir que los clientes inicien el proceso de contratación. Este hito se centra en implementar un sistema de reservaciones básico que permita a los clientes solicitar los servicios de un músico y a los managers aceptar o rechazar esas solicitudes. En esta fase, la gestión de pagos se realizará fuera de la plataforma.
+Con los perfiles públicos funcionales, el siguiente paso es enriquecerlos con contenido multimedia para que los artistas puedan presentarse de manera más atractiva a los clientes. Este hito se centra en añadir la capacidad de subir una foto de banner, una galería de imágenes, videos y pistas de audio al perfil de cada músico.
 
 ## 2. Tareas a Desarrollar
 
-### Sistema de Reservaciones (Booking)
-- **Tarea:** Crear el flujo completo para que un `client` pueda solicitar una reservación a un `manager`.
+### Gestión de Contenido Multimedia
+- **Tarea:** Implementar la lógica para que los `managers` puedan gestionar el contenido multimedia de su perfil.
 - **Detalles:**
-    - Crear un nuevo modelo `Booking` para almacenar los detalles de la reservación, incluyendo `musician_profile_id`, `client_id`, `event_date`, `status` (pendiente, confirmado, cancelado), etc.
-    - En la página de perfil público de cada músico, añadir un formulario de solicitud de reservación.
-    - Implementar la lógica para que el `manager` pueda ver las solicitudes de reservación pendientes en su dashboard.
-    - Añadir acciones para que el `manager` pueda confirmar o cancelar una solicitud de reservación.
+    - **Base de Datos:**
+        - Añadir una columna para la **imagen de banner** en la tabla `musician_profiles`.
+        - Crear una nueva tabla `media` para almacenar las rutas a las imágenes de la galería, videos y pistas de audio. Esta tabla deberá estar relacionada con `musician_profiles`.
+    - **Backend (Manager):**
+        - Desarrollar la funcionalidad de subida de archivos (imágenes, videos, audio). Los archivos se almacenarán siguiendo las especificaciones del proyecto (Amazon S3).
+        - Crear los componentes de Livewire necesarios para que el `manager` pueda realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre su contenido multimedia desde la página de gestión de su perfil.
+    - **Backend (Admin):**
+        - Extender el recurso de Filament (`MusicianProfileResource`) para que los administradores también puedan realizar operaciones CRUD sobre el contenido multimedia de cualquier músico.
 
-### Notificaciones por Email
-- **Tarea:** Implementar un sistema de notificaciones por email para mantener a los usuarios informados sobre el estado de sus reservaciones.
+### Visualización en el Perfil Público
+- **Tarea:** Actualizar la página de perfil público para mostrar todo el nuevo contenido multimedia.
 - **Detalles:**
-    - Enviar una notificación por email al `manager` cuando un `client` solicite una reservación.
-    - Enviar una notificación por email al `client` cuando un `manager` confirme o cancele una reservación.
+    - Mostrar la imagen de banner en la parte superior del perfil.
+    - Crear una sección de galería de imágenes.
+    - Crear secciones para mostrar los videos y reproducir las pistas de audio.
 
 ## 3. Punto de Verificación del Hito
 
 La finalización de este hito se marca cuando el siguiente flujo sea completamente funcional:
-1. Un `client` visita el perfil público de un músico y envía una solicitud de reservación para una fecha específica.
-2. El `manager` del músico recibe una notificación por email y ve la solicitud pendiente en su dashboard.
-3. El `manager` confirma la reservación.
-4. El `client` recibe una notificación por email de que su reservación ha sido confirmada.
+1.  Un `manager` inicia sesión y navega a la página de gestión de su perfil.
+2.  El `manager` sube una foto de banner, varias imágenes para su galería, un video de YouTube (o similar) y una pista de audio.
+3.  Un `client` (o cualquier usuario) visita el perfil público de este músico y puede ver el banner, la galería de imágenes, el video y escuchar la pista de audio.
+4.  Un `admin` puede ver y modificar todo el contenido multimedia de este músico desde el panel de administración de Filament.

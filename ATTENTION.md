@@ -2,7 +2,7 @@
 
 ## Foco Principal
 
-El foco principal del equipo en este momento es completar el **Hito 3: Dashboard de Músicos y Perfiles Públicos**. El objetivo es hacer que los perfiles aprobados sean visibles para los clientes, mejorando el dashboard principal y creando páginas de perfil público para cada músico.
+El foco principal del equipo en este momento es completar el **Hito 4: Perfiles de Músico Enriquecidos**. El objetivo es enriquecer los perfiles de los músicos con contenido multimedia, como una foto de banner, galería de imágenes, videos y pistas de audio.
 
 ## Guía de Instalación y Replicación
 
