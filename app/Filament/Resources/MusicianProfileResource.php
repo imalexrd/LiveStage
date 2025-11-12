@@ -42,12 +42,14 @@ class MusicianProfileResource extends Resource
                     ->required(),
                 Forms\Components\FileUpload::make('banner_image_path')
                     ->label('Banner Image')
+                    ->disk('public')
                     ->directory('banners')
                     ->image(),
                 Forms\Components\Repeater::make('media')
                     ->relationship()
                     ->schema([
                         Forms\Components\FileUpload::make('file_path')
+                            ->disk('public')
                             ->required(),
                         Forms\Components\Select::make('type')
                             ->options([

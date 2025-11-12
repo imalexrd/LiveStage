@@ -29,7 +29,7 @@ class MultimediaManager extends Component
             'bannerImage' => 'image|max:10240', // 10MB Max
         ]);
 
-        $path = $this->bannerImage->store('banners');
+        $path = $this->bannerImage->store('banners', 'public');
 
         $this->profile->update(['banner_image_path' => $path]);
 
@@ -47,7 +47,7 @@ class MultimediaManager extends Component
         ]);
 
         foreach ($this->galleryImages as $image) {
-            $path = $image->store('gallery');
+            $path = $image->store('gallery', 'public');
             $this->profile->media()->create([
                 'file_path' => $path,
                 'type' => 'image',
@@ -67,7 +67,7 @@ class MultimediaManager extends Component
             'videoFile' => 'mimes:mp4,mov,ogg,qt|max:51200', // 50MB Max
         ]);
 
-        $path = $this->videoFile->store('videos');
+        $path = $this->videoFile->store('videos', 'public');
 
         $this->profile->media()->create([
             'file_path' => $path,
@@ -87,7 +87,7 @@ class MultimediaManager extends Component
             'audioFile' => 'mimes:mp3,wav|max:20480', // 20MB Max
         ]);
 
-        $path = $this->audioFile->store('audio');
+        $path = $this->audioFile->store('audio', 'public');
 
         $this->profile->media()->create([
             'file_path' => $path,
@@ -104,7 +104,7 @@ class MultimediaManager extends Component
     public function deleteMedia($mediaId)
     {
         $media = $this->profile->media()->findOrFail($mediaId);
-        Storage::delete($media->file_path);
+        Storage::disk('public')->delete($media->file_path);
         $media->delete();
         $this->profile->refresh();
         session()->flash('message', 'Media deleted successfully.');
