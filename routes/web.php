@@ -26,4 +26,4 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->
 
 Route::get('/profiles/{uuid}', [MusicianProfileController::class, 'show'])
     ->middleware(['auth'])
-    ->name('musician.profile');
+    ->name('musician.profile.show');

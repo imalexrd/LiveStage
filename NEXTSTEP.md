@@ -1,28 +1,29 @@
-# Hito 3: Dashboard de Músicos y Perfiles Públicos
+# Hito 4: Sistema de Reservaciones Básico
 
 ## 1. Contexto General
 
-Con la gestión de perfiles de músicos y la aprobación de administradores ya implementada, el siguiente paso es hacer que los perfiles aprobados sean visibles para los clientes. Este hito se centra en mejorar el dashboard principal para que muestre una lista de los músicos disponibles y en crear una página de perfil público para cada músico.
+Con los perfiles de músicos visibles y accesibles, el siguiente paso es permitir que los clientes inicien el proceso de contratación. Este hito se centra en implementar un sistema de reservaciones básico que permita a los clientes solicitar los servicios de un músico y a los managers aceptar o rechazar esas solicitudes. En esta fase, la gestión de pagos se realizará fuera de la plataforma.
 
 ## 2. Tareas a Desarrollar
 
-### Dashboard Principal
-- **Tarea:** Modificar el dashboard principal para que muestre una lista de todos los perfiles de músicos que han sido aprobados.
+### Sistema de Reservaciones (Booking)
+- **Tarea:** Crear el flujo completo para que un `client` pueda solicitar una reservación a un `manager`.
 - **Detalles:**
-    - Crear un componente de Livewire para mostrar la lista de perfiles de músicos.
-    - Cada elemento de la lista debe mostrar, como mínimo, el nombre del artista, la ciudad y el estado.
-    - Asegurar que solo los perfiles con `is_approved = true` se muestren en el dashboard.
+    - Crear un nuevo modelo `Booking` para almacenar los detalles de la reservación, incluyendo `musician_profile_id`, `client_id`, `event_date`, `status` (pendiente, confirmado, cancelado), etc.
+    - En la página de perfil público de cada músico, añadir un formulario de solicitud de reservación.
+    - Implementar la lógica para que el `manager` pueda ver las solicitudes de reservación pendientes en su dashboard.
+    - Añadir acciones para que el `manager` pueda confirmar o cancelar una solicitud de reservación.
 
-### Página de Perfil Público
-- **Tarea:** Crear una página de perfil público para cada músico.
+### Notificaciones por Email
+- **Tarea:** Implementar un sistema de notificaciones por email para mantener a los usuarios informados sobre el estado de sus reservaciones.
 - **Detalles:**
-    - Crear una nueva ruta y una vista para mostrar los detalles de un perfil de músico específico.
-    - La página del perfil debe mostrar toda la información relevante del músico, incluyendo `artist_name`, `bio`, `location_city`, `location_state`, y `base_price_per_hour`.
-    - Añadir un enlace en cada elemento de la lista del dashboard que lleve a la página de perfil público del músico correspondiente.
+    - Enviar una notificación por email al `manager` cuando un `client` solicite una reservación.
+    - Enviar una notificación por email al `client` cuando un `manager` confirme o cancele una reservación.
 
 ## 3. Punto de Verificación del Hito
 
 La finalización de este hito se marca cuando el siguiente flujo sea completamente funcional:
-1. Un `manager` crea su perfil de músico y un `admin` lo aprueba.
-2. El perfil del músico aprobado aparece en la lista del dashboard principal.
-3. Un `client` (o cualquier usuario) puede hacer clic en el perfil del músico en el dashboard y ver la página de perfil público con todos los detalles del músico.
+1. Un `client` visita el perfil público de un músico y envía una solicitud de reservación para una fecha específica.
+2. El `manager` del músico recibe una notificación por email y ve la solicitud pendiente en su dashboard.
+3. El `manager` confirma la reservación.
+4. El `client` recibe una notificación por email de que su reservación ha sido confirmada.
