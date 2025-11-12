@@ -28,10 +28,16 @@ class MusicianProfile extends Model
         'location_city',
         'location_state',
         'base_price_per_hour',
+        'banner_image_path',
     ];
 
     public function manager()
     {
         return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function media()
+    {
+        return $this->hasMany(Media::class);
     }
 }

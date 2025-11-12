@@ -20,6 +20,10 @@
                     @endif
 
                     <livewire:musician-profile-form />
+
+                    <div class="mt-8">
+                        <livewire:multimedia-manager />
+                    </div>
                 </div>
             </div>
         </div>
