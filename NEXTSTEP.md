@@ -1,28 +1,34 @@
-# Hito 3: Dashboard de Músicos y Perfiles Públicos
+# Hito 4: Perfiles de Músico Enriquecidos
 
 ## 1. Contexto General
 
-Con la gestión de perfiles de músicos y la aprobación de administradores ya implementada, el siguiente paso es hacer que los perfiles aprobados sean visibles para los clientes. Este hito se centra en mejorar el dashboard principal para que muestre una lista de los músicos disponibles y en crear una página de perfil público para cada músico.
+Con los perfiles públicos funcionales, el siguiente paso es enriquecerlos con contenido multimedia para que los artistas puedan presentarse de manera más atractiva a los clientes. Este hito se centra en añadir la capacidad de subir una foto de banner, una galería de imágenes, videos y pistas de audio al perfil de cada músico.
 
 ## 2. Tareas a Desarrollar
 
-### Dashboard Principal
-- **Tarea:** Modificar el dashboard principal para que muestre una lista de todos los perfiles de músicos que han sido aprobados.
+### Gestión de Contenido Multimedia
+- **Tarea:** Implementar la lógica para que los `managers` puedan gestionar el contenido multimedia de su perfil.
 - **Detalles:**
-    - Crear un componente de Livewire para mostrar la lista de perfiles de músicos.
-    - Cada elemento de la lista debe mostrar, como mínimo, el nombre del artista, la ciudad y el estado.
-    - Asegurar que solo los perfiles con `is_approved = true` se muestren en el dashboard.
+    - **Base de Datos:**
+        - Añadir una columna para la **imagen de banner** en la tabla `musician_profiles`.
+        - Crear una nueva tabla `media` para almacenar las rutas a las imágenes de la galería, videos y pistas de audio. Esta tabla deberá estar relacionada con `musician_profiles`.
+    - **Backend (Manager):**
+        - Desarrollar la funcionalidad de subida de archivos (imágenes, videos, audio). Los archivos se almacenarán siguiendo las especificaciones del proyecto (Amazon S3).
+        - Crear los componentes de Livewire necesarios para que el `manager` pueda realizar operaciones CRUD (Crear, Leer, Actualizar, Eliminar) sobre su contenido multimedia desde la página de gestión de su perfil.
+    - **Backend (Admin):**
+        - Extender el recurso de Filament (`MusicianProfileResource`) para que los administradores también puedan realizar operaciones CRUD sobre el contenido multimedia de cualquier músico.
 
-### Página de Perfil Público
-- **Tarea:** Crear una página de perfil público para cada músico.
+### Visualización en el Perfil Público
+- **Tarea:** Actualizar la página de perfil público para mostrar todo el nuevo contenido multimedia.
 - **Detalles:**
-    - Crear una nueva ruta y una vista para mostrar los detalles de un perfil de músico específico.
-    - La página del perfil debe mostrar toda la información relevante del músico, incluyendo `artist_name`, `bio`, `location_city`, `location_state`, y `base_price_per_hour`.
-    - Añadir un enlace en cada elemento de la lista del dashboard que lleve a la página de perfil público del músico correspondiente.
+    - Mostrar la imagen de banner en la parte superior del perfil.
+    - Crear una sección de galería de imágenes.
+    - Crear secciones para mostrar los videos y reproducir las pistas de audio.
 
 ## 3. Punto de Verificación del Hito
 
 La finalización de este hito se marca cuando el siguiente flujo sea completamente funcional:
-1. Un `manager` crea su perfil de músico y un `admin` lo aprueba.
-2. El perfil del músico aprobado aparece en la lista del dashboard principal.
-3. Un `client` (o cualquier usuario) puede hacer clic en el perfil del músico en el dashboard y ver la página de perfil público con todos los detalles del músico.
+1.  Un `manager` inicia sesión y navega a la página de gestión de su perfil.
+2.  El `manager` sube una foto de banner, varias imágenes para su galería, un video de YouTube (o similar) y una pista de audio.
+3.  Un `client` (o cualquier usuario) visita el perfil público de este músico y puede ver el banner, la galería de imágenes, el video y escuchar la pista de audio.
+4.  Un `admin` puede ver y modificar todo el contenido multimedia de este músico desde el panel de administración de Filament.

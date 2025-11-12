@@ -2,7 +2,7 @@
 
 ## Foco Principal
 
-El foco principal del equipo en este momento es completar el **Hito 2: Gestión de Perfiles de Músico y Aprobación de Administrador**. El objetivo es implementar la funcionalidad principal para los roles de `Manager` y `Admin`, permitiendo la creación, gestión y aprobación de perfiles de artistas.
+El foco principal del equipo en este momento es completar el **Hito 4: Perfiles de Músico Enriquecidos**. El objetivo es enriquecer los perfiles de los músicos con contenido multimedia, como una foto de banner, galería de imágenes, videos y pistas de audio.
 
 ## Guía de Instalación y Replicación
 
@@ -69,6 +69,12 @@ Después de ejecutar los seeders, la base de datos contendrá tres usuarios de p
 - **Client:** `client@example.com` / `password`
 
 ## Notas y Contexto para el Futuro
+
+### Decisiones Técnicas del Hito 3
+
+- **Dashboard de Músicos:** Se ha creado un componente de Livewire (`MusiciansList`) para mostrar una lista de los perfiles de músicos que han sido aprobados. Este componente se muestra en el dashboard principal para los usuarios con roles de `client` y `admin`.
+- **Perfiles Públicos:** Se ha implementado una página de perfil público para cada músico, accesible a través de una URL única generada con un `uuid`. Se ha creado un nuevo controlador (`MusicianProfileController`) y una vista para mostrar los detalles del perfil.
+- **Rutas y Navegación:** Se ha añadido una nueva ruta (`/profiles/{uuid}`) para los perfiles públicos y se ha actualizado la lista de músicos en el dashboard para enlazar a estas páginas. Se resolvió un conflicto de nombres de rutas para evitar errores de autorización.
 
 ### Decisiones Técnicas del Hito 2
 
