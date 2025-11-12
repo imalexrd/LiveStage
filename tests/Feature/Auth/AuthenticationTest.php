@@ -64,6 +64,6 @@ class AuthenticationTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('LiveStage');
+            ->assertSee('Dashboard');
     }
 }

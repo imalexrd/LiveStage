@@ -19,6 +19,11 @@ Route::view('musician-profile', 'musician-profile')
 require __DIR__.'/auth.php';
 
 use App\Http\Controllers\Auth\GoogleAuthController;
+use App\Http\Controllers\MusicianProfileController;
 
 Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->name('google.redirect');
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
+
+Route::get('/profiles/{uuid}', [MusicianProfileController::class, 'show'])
+    ->middleware(['auth'])
+    ->name('musician.profile');
