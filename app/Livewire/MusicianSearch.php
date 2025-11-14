@@ -15,7 +15,7 @@ class MusicianSearch extends Component
     public $selectedGenres = [];
     public $selectedEventTypes = [];
     public $minPrice = 0;
-    public_maxPrice = 1000;
+    public $maxPrice = 1000;
 
     public $genres;
     public $eventTypes;
