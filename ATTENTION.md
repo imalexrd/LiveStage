@@ -156,6 +156,32 @@ Para acelerar el proceso de configuración en el futuro, se recomienda crear una
 
 ## Notas y Contexto para el Futuro
 
+### Sistema de Archivos Públicos y Multimedia
+
+Para mostrar imágenes, videos y otros archivos multimedia en el frontend, el proyecto utiliza el sistema de almacenamiento público de Laravel. A continuación se detalla cómo funciona y cómo utilizarlo:
+
+1.  **Almacenamiento:** Todos los archivos subidos por los usuarios se guardan en el directorio `storage/app/public`. Esta carpeta no es directamente accesible desde la web por razones de seguridad.
+
+2.  **Enlace Simbólico (Symlink):** Para hacer que estos archivos sean accesibles públicamente, se utiliza el comando `php artisan storage:link`. Este comando crea un "acceso directo" o *symlink* desde `public/storage` hacia `storage/app/public`. El servidor web (Nginx/Apache) solo tiene acceso al directorio `public`, por lo que este enlace es crucial.
+
+3.  **Cómo Referenciar Archivos en las Vistas (Blade):** Para generar la URL correcta de un archivo en una vista, se debe utilizar el helper `asset()`. Este helper genera una URL completa al archivo dentro del directorio `public`.
+
+    **Ejemplo Práctico:**
+
+    Supongamos que un músico sube una imagen de banner y la ruta se guarda en la base de datos en la columna `banner_image_path` con el valor: `banners/mi-imagen.jpg`.
+
+    Para mostrar esta imagen, el código en la vista Blade sería el siguiente:
+
+    ```blade
+    <img src="{{ asset('storage/' . $musician->banner_image_path) }}" alt="Banner del Músico">
+    ```
+
+    -   `asset()`: Genera la URL base (ej. `http://localhost:8000`).
+    -   `'storage/'`: Apunta al *symlink* creado en el directorio `public`.
+    -   `$musician->banner_image_path`: Es la ruta relativa del archivo guardada en la base de datos.
+
+    El resultado final será una URL como: `http://localhost:8000/storage/banners/mi-imagen.jpg`, que el navegador puede cargar correctamente.
+
 ### Decisiones Técnicas del Hito 4
 
 - **Perfiles Públicos:** Se ha tomado la decisión de hacer que los perfiles de los músicos y todo su contenido multimedia (imágenes, videos, audio) sean de acceso público. Esto elimina la necesidad de que los usuarios inicien sesión para ver los perfiles, lo que simplifica el acceso y la promoción de los artistas. Como resultado, se ha eliminado la autenticación de las rutas de visualización de perfiles y de servicio de archivos.
