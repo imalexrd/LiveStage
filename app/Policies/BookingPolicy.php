@@ -33,4 +33,9 @@ class BookingPolicy
     {
         return $user->id === $booking->musicianProfile->manager_id;
     }
+
+    public function pay(User $user, Booking $booking)
+    {
+        return $user->id === $booking->client_id && $booking->status === 'accepted';
+    }
 }

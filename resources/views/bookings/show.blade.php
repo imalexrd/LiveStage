@@ -40,6 +40,10 @@
                                 <button type="submit" class="px-4 py-2 text-white bg-red-600 rounded-md hover:bg-red-700">Reject</button>
                             </form>
                         </div>
+                    @elseif (auth()->user()->role === 'client' && $booking->status === 'accepted')
+                        <div class="mt-4">
+                            <a href="{{ route('payments.create', $booking) }}" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Pay Now</a>
+                        </div>
                     @endif
                 </div>
             </div>

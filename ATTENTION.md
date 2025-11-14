@@ -150,6 +150,20 @@ Después de ejecutar los seeders, la base de datos contendrá tres usuarios de p
 - **Manager:** `manager@example.com` / `password`
 - **Client:** `client@example.com` / `password`
 
+Para ejecutar las pruebas, crea un archivo `.env.testing` y configura la base de datos de prueba. También necesitarás agregar tus claves de API de Stripe:
+```
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=laravel_test
+DB_USERNAME=root
+DB_PASSWORD=password
+
+STRIPE_KEY=pk_test_...
+STRIPE_SECRET=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+```
+
 ## Nota para Futuros Agentes de IA
 
 Para acelerar el proceso de configuración en el futuro, se recomienda crear una instantánea (snapshot) del entorno una vez que la instalación se haya completado y verificado. Esto permitirá restaurar un estado de trabajo funcional sin tener que repetir todos los pasos de instalación.

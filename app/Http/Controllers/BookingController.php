@@ -41,6 +41,8 @@ class BookingController extends Controller
     {
         $this->authorize('update', $booking);
         $booking->status = 'accepted';
+        // TODO: The duration should be a user-configurable field.
+        $booking->total_price = $booking->musicianProfile->base_price_per_hour * 1;
         $booking->save();
 
         // TODO: Add notification to client
