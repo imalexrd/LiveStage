@@ -182,6 +182,13 @@ Para mostrar imágenes, videos y otros archivos multimedia en el frontend, el pr
 
     El resultado final será una URL como: `http://localhost:8000/storage/banners/mi-imagen.jpg`, que el navegador puede cargar correctamente.
 
+### Decisiones Técnicas del Hito 5
+
+- **Búsqueda y Filtrado de Músicos:** Se ha implementado una página de búsqueda dedicada con un componente de Livewire (`MusicianSearch`) para permitir a los usuarios encontrar músicos basándose in criterios como el nombre, la ciudad, el género y el tipo de evento.
+- **Base de Datos para Búsqueda:** Se ha extendido el esquema de la base de datos para incluir tablas para `genres` y `event_types`, con relaciones de muchos a muchos con los perfiles de los músicos. También se han añadido columnas de `latitude` y `longitude` para futuras mejoras en la búsqueda geoespacial.
+- **Gestión de Perfil Mejorada:** La página de gestión de perfiles de los músicos se ha actualizado para permitirles seleccionar múltiples géneros y tipos de evento a través de checkboxes y elegir su ciudad desde un menú desplegable.
+- **Funcionalidad de Búsqueda Avanzada:** La página de búsqueda ahora incluye filtros de checkboxes para géneros y tipos de evento, con una opción para alternar entre "Match Any (OR)" y "Match All (AND)", proporcionando una experiencia de búsqueda más potente.
+
 ### Decisiones Técnicas del Hito 4
 
 - **Perfiles Públicos:** Se ha tomado la decisión de hacer que los perfiles de los músicos y todo su contenido multimedia (imágenes, videos, audio) sean de acceso público. Esto elimina la necesidad de que los usuarios inicien sesión para ver los perfiles, lo que simplifica el acceso y la promoción de los artistas. Como resultado, se ha eliminado la autenticación de las rutas de visualización de perfiles y de servicio de archivos.

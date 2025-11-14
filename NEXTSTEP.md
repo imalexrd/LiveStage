@@ -1,54 +1,48 @@
-# Propuesta de Próximo Hito: Hito 5 - Búsqueda y Descubrimiento de Músicos
+# Propuesta de Próximo Hito: Hito 6 - Booking and Payments
 
 ## 1. Contexto General
 
-Con los perfiles de músicos públicos y enriquecidos con contenido multimedia, la plataforma ya ofrece una buena presentación de los artistas. El siguiente paso crucial es permitir que los clientes encuentren a estos músicos de manera eficiente. Actualmente, no existe una forma de buscar o filtrar artistas, lo que limita la utilidad de la plataforma a medida que crece el número de perfiles.
+Con la implementación de la búsqueda y el descubrimiento de músicos, los clientes ahora pueden encontrar a los artistas que desean. El siguiente paso lógico es permitirles reservar a estos músicos y realizar pagos seguros a través de la plataforma. Este hito es crucial para la monetización del marketplace y para proporcionar una experiencia de reserva completa y segura tanto para los clientes como para los músicos.
 
-Este hito se centra en la creación de una funcionalidad de búsqueda y descubrimiento que permita a los clientes encontrar músicos basándose en criterios específicos como el género musical, la ubicación, el tipo de evento y el rango de precios.
+Este hito se centrará en la implementación de un sistema de booking completo, desde la solicitud inicial hasta la confirmación y el pago, utilizando Stripe Connect para gestionar las transacciones.
 
 ## 2. Tareas a Desarrollar
 
-### 2.1. Backend: Lógica de Búsqueda y Filtrado
+### 2.1. Backend: Lógica de Booking y Pagos
 
--   **Tarea:** Implementar una API o un endpoint que acepte parámetros de búsqueda y devuelva una lista de perfiles de músicos que coincidan.
+-   **Tarea:** Implementar la lógica de negocio para gestionar el ciclo de vida de una reserva y procesar los pagos.
 -   **Detalles:**
-    -   **Modelo y Controlador:** Crear un nuevo controlador, por ejemplo `MusicianSearchController`, que se encargue de procesar las peticiones de búsqueda.
-    -   **Lógica de Filtrado:** Utilizar Eloquent para construir consultas a la base de datos que filtren los `MusicianProfile` por:
-        -   **Género Musical:** (requerirá añadir una columna o tabla de géneros).
-        -   **Ubicación (Búsqueda por Dirección y Radio):** Implementar una búsqueda geoespacial. Esto implicará almacenar coordenadas (latitud y longitud) y permitir a los usuarios buscar músicos dentro de un radio específico de una dirección o código postal.
-        -   **Tipo de Evento:** (requerirá añadir una columna o tabla para especialidades, ej. "bodas", "conciertos", "eventos corporativos").
-        -   **Rango de Precios:** (filtrar por `base_price_per_hour`).
-    -   **Optimización:** Asegurarse de que las consultas estén optimizadas con índices en la base de datos, especialmente para la búsqueda geoespacial.
+    -   **Modelos y Controladores:** Crear los modelos `Booking` y `Payment`, y sus correspondientes controladores (`BookingController`, `PaymentController`).
+    -   **Flujo de Booking:** Implementar el siguiente flujo:
+        1.  El cliente envía una solicitud de reserva a un músico, especificando la fecha, el lugar y los detalles del evento.
+        2.  El manager del músico recibe una notificación y puede aceptar o rechazar la solicitud.
+        3.  Si la solicitud es aceptada, el cliente es notificado y se le solicita que realice el pago.
+        4.  Una vez que se completa el pago, la reserva se confirma.
+    -   **Integración de Stripe Connect:** Utilizar Stripe Connect para gestionar los pagos, incluyendo:
+        -   **Onboarding de Managers:** Crear un flujo para que los managers conecten sus cuentas de Stripe a la plataforma.
+        -   **Procesamiento de Pagos:** Implementar la lógica para cobrar a los clientes y transferir los fondos a la cuenta del manager, descontando la comisión de la plataforma.
 
-### 2.2. Frontend: Interfaz de Búsqueda
+### 2.2. Frontend: Interfaz de Booking y Pagos
 
--   **Tarea:** Crear una nueva página de "Búsqueda" o "Descubrimiento" donde los clientes puedan interactuar con los filtros.
+-   **Tarea:** Crear las vistas y componentes necesarios para que los usuarios interactúen con el sistema de booking.
 -   **Detalles:**
-    -   **Componente de Livewire:** Desarrollar un componente de Livewire (`MusicianSearch`) que contenga:
-        -   Un campo de búsqueda de texto libre (para buscar por nombre de artista o palabras clave en la bio).
-        -   Un campo de dirección autocompletable (utilizando una API como Google Places) para la búsqueda por ubicación y un selector de radio (ej. "a 10 km").
-        -   Filtros desplegables o checkboxes para género y tipo de evento.
-        -   Un slider o campos de entrada para el rango de precios.
-    -   **Resultados Dinámicos:** La lista de resultados se actualizará dinámicamente a medida que el usuario aplique los filtros, utilizando las capacidades reactivas de Livewire.
-    -   **Diseño de la Página:** Diseñar una vista clara y atractiva que muestre los resultados de la búsqueda, reutilizando posiblemente el diseño de las tarjetas de músico existentes.
+    -   **Componente de Solicitud de Reserva:** Crear un componente de Livewire (`BookingRequestForm`) que permita a los clientes enviar solicitudes de reserva desde el perfil de un músico.
+    -   **Página de Gestión de Reservas:** Crear una página donde los clientes y los managers puedan ver y gestionar sus reservas.
+    -   **Flujo de Pago:** Implementar una página de pago donde los clientes puedan introducir sus datos de pago y completar la transacción a través de Stripe.
 
-### 2.3. Base de Datos: Nuevos Campos
+### 2.3. Base de Datos: Nuevos Campos y Tablas
 
--   **Tarea:** Extender el esquema de la base de datos para soportar los nuevos criterios de búsqueda.
+-   **Tarea:** Extender el esquema de la base de datos para soportar el sistema de booking.
 -   **Detalles:**
-    -   **Migraciones:** Crear las migraciones necesarias para añadir:
-        -   Columnas de `latitud` and `longitud` a la tabla `musician_profiles`.
-        -   Una tabla `genres` y una tabla pivote `genre_musician_profile` para permitir que cada músico tenga múltiples géneros.
-        -   Una tabla `event_types` y una tabla pivote `event_type_musician_profile` para las especialidades de eventos.
-    -   **Actualizar Modelos:** Añadir las relaciones correspondientes (`belongsToMany`) en los modelos `MusicianProfile`, `Genre` y `EventType`.
+    -   **Migraciones:** Crear las migraciones necesarias para las tablas `bookings` y `payments`.
+    -   **Actualizar Modelos:** Añadir las relaciones correspondientes en los modelos `User`, `MusicianProfile`, `Booking` y `Payment`.
 
 ## 3. Punto de Verificación del Hito
 
 El hito se considerará completado cuando el siguiente flujo sea completamente funcional:
-1.  Un cliente (o cualquier visitante) navega a la nueva página de "Búsqueda".
-2.  El usuario puede introducir una dirección y un radio, y aplicar filtros por género, tipo de evento y precio.
-3.  La lista de músicos se actualiza en tiempo real para mostrar solo los perfiles que coinciden con los criterios.
-4.  Al hacer clic en un músico de los resultados, el usuario es redirigido a su perfil público.
-5.  Los *managers* pueden seleccionar los géneros y tipos de evento de su perfil y establecer su ubicación (que se geocodificará automáticamente a latitud/longitud) desde la página de gestión de su perfil.
+1.  Un cliente puede solicitar una reserva a un músico desde su perfil.
+2.  Un manager puede aceptar o rechazar una solicitud de reserva.
+3.  Un cliente puede pagar una reserva aceptada a través de Stripe.
+4.  Tanto el cliente como el manager pueden ver el estado de sus reservas en una página de gestión.
 
-Este hito sentará las bases para futuras funcionalidades como sistemas de recomendación y una página de inicio más dinámica.
+Este hito sentará las bases para futuras funcionalidades como la gestión de calendarios, los contratos automáticos y los sistemas de reseñas.

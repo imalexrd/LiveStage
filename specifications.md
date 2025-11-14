@@ -142,7 +142,8 @@ La API está diseñada para ser intuitiva y RESTful, aprovechando la relación 1
 *   `POST /api/auth/google/callback` (Pública)
 *   `GET /api/user` (Autenticado): Obtiene los datos del usuario logueado.
 
-#### **5.2. Perfiles Públicos y Búsqueda (`PublicProfileController`)**
+#### **5.2. Perfiles Públicos y Búsqueda (`PublicProfileController`, `MusicianSearchController`)**
+*   `GET /search`: Muestra la página de búsqueda de músicos.
 *   `GET /api/profiles`: Lista pública de perfiles aprobados. Acepta filtros como `?genre=cumbia&city=denver&radius=50&date=2025-12-24`.
 *   `GET /api/profiles/{profileId}`: Vista pública detallada de un perfil de músico.
 *   `GET /api/genres`: Lista todas las categorías y géneros.
@@ -181,7 +182,7 @@ La API es más limpia ya que el manager opera sobre su propio perfil implícito.
 
 ### **6. Plan de Desarrollo por Fases (Roadmap)**
 
-**Fase 1: Mínimo Producto Viable (MVP)**
+**Fase 1: Mínimo Producto Viable (MVP) - Completado**
 *   **Objetivo:** Lanzar la funcionalidad central para validar el modelo de negocio.
 *   **Features:**
     1.  Sistema de autenticación completo: Email/contraseña y Google OAuth.
@@ -191,7 +192,15 @@ La API es más limpia ya que el manager opera sobre su propio perfil implícito.
     5.  Sistema de reservaciones (solicitar, confirmar, cancelar) **sin integración de pagos**. La coordinación del pago se hará fuera de la plataforma.
     6.  Panel de administración funcional (Filament) para gestionar usuarios, perfiles y géneros.
 
-**Fase 2: Monetización y Confianza**
+**Fase 2: Búsqueda y Descubrimiento - Completado**
+*   **Objetivo:** Crear una funcionalidad de búsqueda y descubrimiento que permita a los clientes encontrar músicos basándose en criterios específicos como el género musical, la ubicación, el tipo de evento y el rango de precios.
+*   **Features:**
+    1.  Implementación de una página de búsqueda con filtros dinámicos.
+    2.  Extensión de la base de datos para incluir géneros, tipos de evento y coordenadas de ubicación.
+    3.  Actualización de la página de gestión de perfiles para permitir a los músicos añadir esta información.
+    4.  Búsqueda por nombre, ciudad, género, tipo de evento y rango de precios.
+
+**Fase 3: Monetización y Confianza**
 *   **Objetivo:** Activar los flujos de ingresos y construir un ecosistema seguro y confiable.
 *   **Features:**
     1.  Integración completa de **Stripe Connect**: Onboarding de Managers (KYC) para recibir pagos.
@@ -201,7 +210,7 @@ La API es más limpia ya que el manager opera sobre su propio perfil implícito.
     5.  Generación automática de **Contratos en PDF** al confirmar un booking.
     6.  Sistema completo de **Notificaciones por Email** para todos los eventos clave.
 
-**Fase 3: Crecimiento y Experiencia de Usuario Avanzada**
+**Fase 4: Crecimiento y Experiencia de Usuario Avanzada**
 *   **Objetivo:** Mejorar la plataforma con funcionalidades premium, herramientas avanzadas de búsqueda y preparación para la expansión móvil.
 *   **Features:**
     1.  **Suscripciones Premium para Managers**: Planes de pago para destacar perfiles en los resultados de búsqueda.
