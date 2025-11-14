@@ -6,20 +6,20 @@
                     <h3 class="text-lg font-semibold mb-4">Filters</h3>
                     <div>
                         <label for="search" class="block text-sm font-medium text-gray-700">Search</label>
-                        <input type="text" wire:model="search" id="search" class="mt-1 block w-full">
+                        <input type="text" wire:model.live="search" id="search" class="mt-1 block w-full">
                     </div>
                     <div class="mt-4">
                         <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                        <input type="text" wire:model="location" id="location" class="mt-1 block w-full">
+                        <input type="text" wire:model.live="location" id="location" class="mt-1 block w-full">
                         <p class="text-xs text-gray-500 mt-1">Search by city for now.</p>
                     </div>
                     <div class="mt-4">
                         <label for="radius" class="block text-sm font-medium text-gray-700">Radius (km)</label>
-                        <input type="number" wire:model="radius" id="radius" class="mt-1 block w-full">
+                        <input type="number" wire:model.live="radius" id="radius" class="mt-1 block w-full">
                     </div>
                     <div class="mt-4">
                         <label for="genres" class="block text-sm font-medium text-gray-700">Genres</label>
-                        <select wire:model="selectedGenres" id="genres" class="mt-1 block w-full" multiple>
+                        <select wire:model.live="selectedGenres" id="genres" class="mt-1 block w-full" multiple>
                             @foreach($genres as $genre)
                                 <option value="{{ $genre->id }}">{{ $genre->name }}</option>
                             @endforeach
@@ -27,7 +27,7 @@
                     </div>
                     <div class="mt-4">
                         <label for="event_types" class="block text-sm font-medium text-gray-700">Event Types</label>
-                        <select wire:model="selectedEventTypes" id="event_types" class="mt-1 block w-full" multiple>
+                        <select wire:model.live="selectedEventTypes" id="event_types" class="mt-1 block w-full" multiple>
                             @foreach($eventTypes as $eventType)
                                 <option value="{{ $eventType->id }}">{{ $eventType->name }}</option>
                             @endforeach
@@ -38,8 +38,8 @@
                         <div>
                             <span>${{ $minPrice }}</span> - <span>${{ $maxPrice }}</span>
                         </div>
-                        <input type="range" wire:model="minPrice" min="0" max="500" class="w-full">
-                        <input type="range" wire:model="maxPrice" min="501" max="1000" class="w-full">
+                        <input type="range" wire:model.live="minPrice" min="0" max="500" class="w-full">
+                        <input type="range" wire:model.live="maxPrice" min="501" max="1000" class="w-full">
                     </div>
                 </div>
             </div>
