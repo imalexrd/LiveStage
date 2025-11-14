@@ -20,7 +20,7 @@
             </form>
             @if ($profile->banner_image_path)
                 <div class="mt-4">
-                    <img src="{{ url('/storage/' . $profile->banner_image_path) }}" alt="Banner Image" class="w-full h-auto rounded-lg shadow-md">
+                    <img src="{{ asset('storage/' . $profile->banner_image_path) }}" alt="Banner Image" class="w-full h-auto rounded-lg shadow-md">
                 </div>
             @endif
         </div>
@@ -38,7 +38,7 @@
             <div class="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 @foreach($media->where('type', 'image') as $image)
                     <div class="relative">
-                        <img src="{{ url('/storage/' . $image->file_path) }}" alt="Gallery Image" class="w-full h-auto rounded-lg shadow-md">
+                        <img src="{{ asset('storage/' . $image->file_path) }}" alt="Gallery Image" class="w-full h-auto rounded-lg shadow-md">
                         <button wire:click="deleteMedia({{ $image->id }})" class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 m-2">
                             &times;
                         </button>
@@ -60,7 +60,7 @@
             @foreach($media->where('type', 'video') as $video)
                 <div class="mt-4 relative">
                     <video controls class="w-full h-auto rounded-lg shadow-md">
-                        <source src="{{ url('/storage/' . $video->file_path) }}" type="video/mp4">
+                        <source src="{{ asset('storage/' . $video->file_path) }}" type="video/mp4">
                         Your browser does not support the video tag.
                     </video>
                     <button wire:click="deleteMedia({{ $video->id }})" class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 m-2">
@@ -83,7 +83,7 @@
             @foreach($media->where('type', 'audio') as $audio)
                 <div class="mt-4 relative">
                     <audio controls class="w-full">
-                        <source src="{{ url('/storage/' . $audio->file_path) }}" type="audio/mpeg">
+                        <source src="{{ asset('storage/' . $audio->file_path) }}" type="audio/mpeg">
                         Your browser does not support the audio element.
                     </audio>
                     <button wire:click="deleteMedia({{ $audio->id }})" class="absolute top-0 right-0 bg-red-500 text-white rounded-full p-1 m-2">

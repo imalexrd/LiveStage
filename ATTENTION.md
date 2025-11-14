@@ -6,6 +6,8 @@ El foco principal del equipo en este momento es completar el **Hito 4: Perfiles 
 
 ## Guía de Instalación y Replicación
 
+Esta guía proporciona los pasos para configurar el entorno de desarrollo desde cero.
+
 ### 1. Dependencias del Entorno
 
 Antes de instalar el proyecto, es necesario asegurarse de que el entorno de desarrollo cumple con los siguientes requisitos. Los siguientes comandos son para un sistema basado en Ubuntu:
@@ -24,9 +26,30 @@ sudo apt-get install -y composer
 sudo apt-get install -y postgresql postgresql-contrib
 ```
 
-### 2. Instalación del Proyecto
+### 2. Configuración de la Base de Datos
 
-Una vez que las dependencias del entorno estén instaladas, sigue estos pasos para poner en marcha el proyecto:
+Después de instalar PostgreSQL, es necesario configurar la base de datos y el usuario que la aplicación utilizará.
+
+```bash
+# Iniciar el servicio de PostgreSQL
+sudo service postgresql start
+
+# Crear la base de datos para la aplicación
+sudo -u postgres psql -c "CREATE DATABASE laravel;"
+
+# Crear un nuevo usuario (reemplaza 'password' con una contraseña segura)
+sudo -u postgres psql -c "CREATE USER root WITH PASSWORD 'password';"
+
+# Otorgar todos los privilegios de la base de datos al nuevo usuario
+sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE laravel TO root;"
+
+# Otorgar privilegios sobre el esquema public (necesario para las migraciones)
+sudo -u postgres psql -c "GRANT ALL ON SCHEMA public TO root;" -d laravel
+```
+
+### 3. Instalación del Proyecto
+
+Una vez que las dependencias y la base de datos estén listas, sigue estos pasos:
 
 ```bash
 # 1. Clona el repositorio (si aún no lo has hecho)
@@ -42,33 +65,126 @@ npm install
 # 4. Compila los assets del frontend
 npm run build
 
-# 5. Crea tu archivo de entorno a partir del ejemplo
-cp .env.example .env
+# 5. Crea y configura tu archivo de entorno
+# El archivo .env.example está incompleto. Copia el siguiente contenido a un nuevo
+# archivo llamado .env y ajústalo según tu configuración local.
+# --- INICIO DEL CONTENIDO PARA .env ---
+APP_NAME=Laravel
+APP_ENV=local
+APP_KEY=
+APP_DEBUG=true
+APP_URL=http://localhost
 
-# 6. Genera la clave de la aplicación
+LOG_CHANNEL=stack
+LOG_DEPRECATIONS_CHANNEL=null
+LOG_LEVEL=debug
+
+DB_CONNECTION=pgsql
+DB_HOST=127.0.0.1
+DB_PORT=5432
+DB_DATABASE=laravel
+DB_USERNAME=root
+DB_PASSWORD=password
+
+BROADCAST_CONNECTION=log
+CACHE_DRIVER=file
+FILESYSTEM_DISK=local
+QUEUE_CONNECTION=database
+SESSION_DRIVER=file
+SESSION_LIFETIME=120
+MEMCACHED_HOST=127.0.0.1
+
+REDIS_HOST=127.0.0.1
+REDIS_PASSWORD=null
+REDIS_PORT=6379
+
+MAIL_MAILER=smtp
+MAIL_HOST=mailpit
+MAIL_PORT=1025
+MAIL_USERNAME=null
+MAIL_PASSWORD=null
+MAIL_ENCRYPTION=null
+MAIL_FROM_ADDRESS="hello@example.com"
+MAIL_FROM_NAME="${APP_NAME}"
+
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
+AWS_DEFAULT_REGION=us-east-1
+AWS_BUCKET=
+AWS_USE_PATH_STYLE_ENDPOINT=false
+
+PUSHER_APP_ID=
+PUSHER_APP_KEY=
+PUSHER_APP_SECRET=
+PUSHER_HOST=
+PUSHER_PORT=443
+PUSHER_SCHEME=https
+PUSHER_APP_CLUSTER=mt1
+
+VITE_APP_NAME="${APP_NAME}"
+VITE_PUSHER_APP_KEY="${PUSHER_APP_KEY}"
+VITE_PUSHER_HOST="${PUSHER_HOST}"
+VITE_PUSHER_PORT="${PUSHER_PORT}"
+VITE_PUSHER_SCHEME="${PUSHER_SCHEME}"
+VITE_PUSHER_APP_CLUSTER="${PUSHER_APP_CLUSTER}"
+
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_REDIRECT_URI=http://localhost/auth/google/callback
+# --- FIN DEL CONTENIDO PARA .env ---
+
+# 6. Genera la clave de la aplicación (esto llenará la variable APP_KEY en .env)
 php artisan key:generate
 
-# 7. Configura tu base de datos en el archivo .env
-# Asegúrate de que las variables DB_DATABASE, DB_USERNAME y DB_PASSWORD
-# coincidan con tu configuración de PostgreSQL.
-
-# 8. Configura las credenciales de Google OAuth en .env
-# Añade tu Client ID y Client Secret de Google.
-# GOOGLE_CLIENT_ID=
-# GOOGLE_CLIENT_SECRET=
-
-# 9. Ejecuta las migraciones y los seeders para poblar la base de datos
+# 7. Ejecuta las migraciones y los seeders para poblar la base de datos
 php artisan migrate:fresh --seed
+
+# 8. Crea el enlace simbólico para el almacenamiento público
+php artisan storage:link
 ```
 
-### 3. Base de Datos de Prueba
+### 4. Base de Datos de Prueba
 
 Después de ejecutar los seeders, la base de datos contendrá tres usuarios de prueba. Puedes iniciar sesión con las siguientes credenciales:
 - **Admin:** `admin@example.com` / `password`
 - **Manager:** `manager@example.com` / `password`
 - **Client:** `client@example.com` / `password`
 
+## Nota para Futuros Agentes de IA
+
+Para acelerar el proceso de configuración en el futuro, se recomienda crear una instantánea (snapshot) del entorno una vez que la instalación se haya completado y verificado. Esto permitirá restaurar un estado de trabajo funcional sin tener que repetir todos los pasos de instalación.
+
 ## Notas y Contexto para el Futuro
+
+### Sistema de Archivos Públicos y Multimedia
+
+Para mostrar imágenes, videos y otros archivos multimedia en el frontend, el proyecto utiliza el sistema de almacenamiento público de Laravel. A continuación se detalla cómo funciona y cómo utilizarlo:
+
+1.  **Almacenamiento:** Todos los archivos subidos por los usuarios se guardan en el directorio `storage/app/public`. Esta carpeta no es directamente accesible desde la web por razones de seguridad.
+
+2.  **Enlace Simbólico (Symlink):** Para hacer que estos archivos sean accesibles públicamente, se utiliza el comando `php artisan storage:link`. Este comando crea un "acceso directo" o *symlink* desde `public/storage` hacia `storage/app/public`. El servidor web (Nginx/Apache) solo tiene acceso al directorio `public`, por lo que este enlace es crucial.
+
+3.  **Cómo Referenciar Archivos en las Vistas (Blade):** Para generar la URL correcta de un archivo en una vista, se debe utilizar el helper `asset()`. Este helper genera una URL completa al archivo dentro del directorio `public`.
+
+    **Ejemplo Práctico:**
+
+    Supongamos que un músico sube una imagen de banner y la ruta se guarda en la base de datos en la columna `banner_image_path` con el valor: `banners/mi-imagen.jpg`.
+
+    Para mostrar esta imagen, el código en la vista Blade sería el siguiente:
+
+    ```blade
+    <img src="{{ asset('storage/' . $musician->banner_image_path) }}" alt="Banner del Músico">
+    ```
+
+    -   `asset()`: Genera la URL base (ej. `http://localhost:8000`).
+    -   `'storage/'`: Apunta al *symlink* creado en el directorio `public`.
+    -   `$musician->banner_image_path`: Es la ruta relativa del archivo guardada en la base de datos.
+
+    El resultado final será una URL como: `http://localhost:8000/storage/banners/mi-imagen.jpg`, que el navegador puede cargar correctamente.
+
+### Decisiones Técnicas del Hito 4
+
+- **Perfiles Públicos:** Se ha tomado la decisión de hacer que los perfiles de los músicos y todo su contenido multimedia (imágenes, videos, audio) sean de acceso público. Esto elimina la necesidad de que los usuarios inicien sesión para ver los perfiles, lo que simplifica el acceso y la promoción de los artistas. Como resultado, se ha eliminado la autenticación de las rutas de visualización de perfiles y de servicio de archivos.
 
 ### Decisiones Técnicas del Hito 3
 

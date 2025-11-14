@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\FileController;
 
 Route::view('/', 'welcome');
 
@@ -26,10 +25,4 @@ Route::get('/auth/google/redirect', [GoogleAuthController::class, 'redirect'])->
 Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->name('google.callback');
 
 Route::get('/profiles/{uuid}', [MusicianProfileController::class, 'show'])
-    ->middleware(['auth'])
     ->name('musician.profile.show');
-
-Route::get('/storage/{path}', [FileController::class, 'serve'])
-    ->where('path', '.*')
-    ->middleware('auth')
-    ->name('storage.serve');
