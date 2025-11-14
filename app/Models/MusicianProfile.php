@@ -34,6 +34,7 @@ class MusicianProfile extends Model
         'latitude',
         'longitude',
         'is_approved',
+        'stripe_connect_id',
     ];
 
     public function manager()

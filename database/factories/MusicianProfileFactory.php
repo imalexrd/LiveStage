@@ -24,6 +24,7 @@ class MusicianProfileFactory extends Factory
             'location_city' => $this->faker->city,
             'location_state' => $this->faker->state,
             'base_price_per_hour' => $this->faker->numberBetween(100, 1000),
+            'stripe_connect_id' => null,
         ];
     }
 }

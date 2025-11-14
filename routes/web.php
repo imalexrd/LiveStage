@@ -30,6 +30,7 @@ Route::get('/profiles/{uuid}', [MusicianProfileController::class, 'show'])
 Route::view('search', 'search')->name('search');
 
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\PaymentController;
 
 Route::middleware(['auth'])->group(function () {
     Route::view('bookings', 'bookings')->name('bookings');
@@ -37,4 +38,13 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
     Route::put('/bookings/{booking}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
     Route::put('/bookings/{booking}/reject', [BookingController::class, 'reject'])->name('bookings.reject');
+    Route::get('/bookings/{booking}/payment', [PaymentController::class, 'createPaymentIntent'])->name('payments.create');
+});
+
+use App\Http\Controllers\StripeConnectController;
+
+Route::middleware(['auth', 'isManager'])->group(function () {
+    Route::get('/stripe/connect', [StripeConnectController::class, 'createAccountLink'])->name('stripe.connect.create');
+    Route::get('/stripe/connect/return', [StripeConnectController::class, 'handleReturn'])->name('stripe.connect.return');
+    Route::get('/stripe/connect/refresh', [StripeConnectController::class, 'handleRefresh'])->name('stripe.connect.refresh');
 });
