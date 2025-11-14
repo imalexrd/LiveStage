@@ -10,6 +10,8 @@ class MusicianProfile extends Model
 {
     use HasFactory;
 
+    // TODO: The creating event is not firing as expected when using the seeder.
+    // The uuid is not being automatically generated. This needs further investigation.
     protected static function boot()
     {
         parent::boot();

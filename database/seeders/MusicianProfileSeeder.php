@@ -8,6 +8,7 @@ use App\Models\MusicianProfile;
 use App\Models\User;
 use App\Models\Genre;
 use App\Models\EventType;
+use Illuminate\Support\Str;
 
 class MusicianProfileSeeder extends Seeder
 {
@@ -21,6 +22,7 @@ class MusicianProfileSeeder extends Seeder
 
         if ($manager) {
             $profile1 = new MusicianProfile([
+                'uuid' => Str::uuid(),
                 'manager_id' => $manager->id,
                 'artist_name' => 'The Cool Cats',
                 'bio' => 'A cool jazz band playing smooth tunes for any occasion.',
@@ -51,6 +53,7 @@ class MusicianProfileSeeder extends Seeder
         ]);
 
         $profile2 = new MusicianProfile([
+            'uuid' => Str::uuid(),
             'manager_id' => $manager2->id,
             'artist_name' => 'Rock On',
             'bio' => 'High-energy rock band that covers classic hits and originals.',
@@ -78,6 +81,7 @@ class MusicianProfileSeeder extends Seeder
         ]);
 
         $profile3 = new MusicianProfile([
+            'uuid' => Str::uuid(),
             'manager_id' => $manager3->id,
             'artist_name' => 'DJ Spark',
             'bio' => 'Electronic and Pop DJ for parties and festivals.',
