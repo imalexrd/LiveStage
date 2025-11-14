@@ -40,4 +40,14 @@ class MusicianProfile extends Model
     {
         return $this->hasMany(Media::class);
     }
+
+    public function genres()
+    {
+        return $this->belongsToMany(Genre::class, 'genre_musician_profile');
+    }
+
+    public function eventTypes()
+    {
+        return $this->belongsToMany(EventType::class, 'event_type_musician_profile');
+    }
 }

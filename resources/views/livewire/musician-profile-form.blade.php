@@ -25,9 +25,39 @@
         </div>
 
         <div class="mt-4">
+            <x-input-label for="latitude" :value="__('Latitude')" />
+            <x-text-input wire:model="latitude" id="latitude" class="block mt-1 w-full" type="text" name="latitude" />
+            @error('latitude') <span class="text-danger">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="longitude" :value="__('Longitude')" />
+            <x-text-input wire:model="longitude" id="longitude" class="block mt-1 w-full" type="text" name="longitude" />
+            @error('longitude') <span class="text-danger">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mt-4">
             <x-input-label for="base_price_per_hour" :value="__('Base Price Per Hour')" />
             <x-text-input wire:model="base_price_per_hour" id="base_price_per_hour" class="block mt-1 w-full" type="number" name="base_price_per_hour" required />
             @error('base_price_per_hour') <span class="text-danger">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="genres" :value="__('Genres')" />
+            <select wire:model="selectedGenres" id="genres" class="block mt-1 w-full" multiple>
+                @foreach($genres as $genre)
+                    <option value="{{ $genre->id }}">{{ $genre->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="event_types" :value="__('Event Types')" />
+            <select wire:model="selectedEventTypes" id="event_types" class="block mt-1 w-full" multiple>
+                @foreach($eventTypes as $eventType)
+                    <option value="{{ $eventType->id }}">{{ $eventType->name }}</option>
+                @endforeach
+            </select>
         </div>
 
         <div class="flex items-center justify-end mt-4">

@@ -32,6 +32,9 @@ $logout = function (Logout $logout) {
                             {{ __('Musician Profile') }}
                         </x-nav-link>
                     @endif
+                    <x-nav-link :href="route('search')" :active="request()->routeIs('search')" wire:navigate>
+                        {{ __('Search') }}
+                    </x-nav-link>
                 </div>
             </div>
 
@@ -88,6 +91,9 @@ $logout = function (Logout $logout) {
                     {{ __('Musician Profile') }}
                 </x-responsive-nav-link>
             @endif
+            <x-responsive-nav-link :href="route('search')" :active="request()->routeIs('search')" wire:navigate>
+                {{ __('Search') }}
+            </x-responsive-nav-link>
         </div>
 
         <!-- Responsive Settings Options -->
