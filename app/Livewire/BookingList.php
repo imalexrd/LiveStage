@@ -8,7 +8,7 @@ use Livewire\Component;
 class BookingList extends Component
 {
     use AuthorizesRequests;
-{
+
     public function render()
     {
         $bookings = auth()->user()->role === 'manager'
