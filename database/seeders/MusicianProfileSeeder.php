@@ -20,7 +20,7 @@ class MusicianProfileSeeder extends Seeder
         $manager = User::where('email', 'manager@example.com')->first();
 
         if ($manager) {
-            $profile1 = MusicianProfile::create([
+            $profile1 = new MusicianProfile([
                 'manager_id' => $manager->id,
                 'artist_name' => 'The Cool Cats',
                 'bio' => 'A cool jazz band playing smooth tunes for any occasion.',
@@ -31,6 +31,7 @@ class MusicianProfileSeeder extends Seeder
                 'base_price_per_hour' => 250,
                 'is_approved' => true,
             ]);
+            $profile1->save();
 
             // Attach genres and event types
             $jazz = Genre::where('name', 'Jazz')->first();
@@ -49,7 +50,7 @@ class MusicianProfileSeeder extends Seeder
             'role' => 'manager',
         ]);
 
-        $profile2 = MusicianProfile::create([
+        $profile2 = new MusicianProfile([
             'manager_id' => $manager2->id,
             'artist_name' => 'Rock On',
             'bio' => 'High-energy rock band that covers classic hits and originals.',
@@ -60,6 +61,7 @@ class MusicianProfileSeeder extends Seeder
             'base_price_per_hour' => 300,
             'is_approved' => true,
         ]);
+        $profile2->save();
 
         $rock = Genre::where('name', 'Rock')->first();
         $weddings = EventType::where('name', 'Weddings')->first();
@@ -75,7 +77,7 @@ class MusicianProfileSeeder extends Seeder
             'role' => 'manager',
         ]);
 
-        $profile3 = MusicianProfile::create([
+        $profile3 = new MusicianProfile([
             'manager_id' => $manager3->id,
             'artist_name' => 'DJ Spark',
             'bio' => 'Electronic and Pop DJ for parties and festivals.',
@@ -86,6 +88,7 @@ class MusicianProfileSeeder extends Seeder
             'base_price_per_hour' => 150,
             'is_approved' => true,
         ]);
+        $profile3->save();
 
         $pop = Genre::where('name', 'Pop')->first();
         $electronic = Genre::where('name', 'Electronic')->first();

@@ -29,6 +29,9 @@ class MusicianProfile extends Model
         'location_state',
         'base_price_per_hour',
         'banner_image_path',
+        'latitude',
+        'longitude',
+        'is_approved',
     ];
 
     public function manager()
