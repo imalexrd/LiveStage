@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Models\Genre;
 use App\Models\EventType;
+use Illuminate\Validation\Rule;
 
 class MusicianProfileForm extends Component
 {
@@ -22,6 +23,12 @@ class MusicianProfileForm extends Component
     public $eventTypes;
     public $selectedGenres = [];
     public $selectedEventTypes = [];
+
+    public $supportedCities = [
+        'New York',
+        'Los Angeles',
+        'Miami',
+    ];
 
     public function mount()
     {
@@ -47,7 +54,7 @@ class MusicianProfileForm extends Component
         $validatedData = $this->validate([
             'artist_name' => 'required|string|max:255',
             'bio' => 'required|string',
-            'location_city' => 'required|string|max:255',
+            'location_city' => ['required', Rule::in($this->supportedCities)],
             'location_state' => 'required|string|max:255',
             'base_price_per_hour' => 'required|numeric|min:0',
             'latitude' => 'nullable|numeric',

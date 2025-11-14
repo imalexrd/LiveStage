@@ -10,28 +10,58 @@
                     </div>
                     <div class="mt-4">
                         <label for="location" class="block text-sm font-medium text-gray-700">Location</label>
-                        <input type="text" wire:model.live="location" id="location" class="mt-1 block w-full">
-                        <p class="text-xs text-gray-500 mt-1">Search by city for now.</p>
-                    </div>
-                    <div class="mt-4">
-                        <label for="radius" class="block text-sm font-medium text-gray-700">Radius (km)</label>
-                        <input type="number" wire:model.live="radius" id="radius" class="mt-1 block w-full">
+                        <select wire:model.live="location" id="location" class="mt-1 block w-full">
+                            <option value="">All Cities</option>
+                            @foreach($supportedCities as $city)
+                                <option value="{{ $city }}">{{ $city }}</option>
+                            @endforeach
+                        </select>
                     </div>
                     <div class="mt-4">
                         <label for="genres" class="block text-sm font-medium text-gray-700">Genres</label>
-                        <select wire:model.live="selectedGenres" id="genres" class="mt-1 block w-full" multiple>
+                        <div class="mt-2 space-y-2">
                             @foreach($genres as $genre)
-                                <option value="{{ $genre->id }}">{{ $genre->name }}</option>
+                                <div>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" wire:model.live="selectedGenres" value="{{ $genre->id }}" class="form-checkbox">
+                                        <span class="ml-2">{{ $genre->name }}</span>
+                                    </label>
+                                </div>
                             @endforeach
-                        </select>
+                        </div>
+                        <div class="mt-2">
+                            <label class="inline-flex items-center">
+                                <input type="radio" wire:model.live="genreMatch" value="any" class="form-radio">
+                                <span class="ml-2">Match Any</span>
+                            </label>
+                            <label class="inline-flex items-center ml-4">
+                                <input type="radio" wire:model.live="genreMatch" value="all" class="form-radio">
+                                <span class="ml-2">Match All</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="mt-4">
                         <label for="event_types" class="block text-sm font-medium text-gray-700">Event Types</label>
-                        <select wire:model.live="selectedEventTypes" id="event_types" class="mt-1 block w-full" multiple>
+                        <div class="mt-2 space-y-2">
                             @foreach($eventTypes as $eventType)
-                                <option value="{{ $eventType->id }}">{{ $eventType->name }}</option>
+                                <div>
+                                    <label class="inline-flex items-center">
+                                        <input type="checkbox" wire:model.live="selectedEventTypes" value="{{ $eventType->id }}" class="form-checkbox">
+                                        <span class="ml-2">{{ $eventType->name }}</span>
+                                    </label>
+                                </div>
                             @endforeach
-                        </select>
+                        </div>
+                        <div class="mt-2">
+                            <label class="inline-flex items-center">
+                                <input type="radio" wire:model.live="eventTypeMatch" value="any" class="form-radio">
+                                <span class="ml-2">Match Any</span>
+                            </label>
+                            <label class="inline-flex items-center ml-4">
+                                <input type="radio" wire:model.live="eventTypeMatch" value="all" class="form-radio">
+                                <span class="ml-2">Match All</span>
+                            </label>
+                        </div>
                     </div>
                     <div class="mt-4">
                         <label for="price_range" class="block text-sm font-medium text-gray-700">Price Range</label>
