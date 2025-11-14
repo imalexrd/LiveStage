@@ -26,3 +26,5 @@ Route::get('/auth/google/callback', [GoogleAuthController::class, 'callback'])->
 
 Route::get('/profiles/{uuid}', [MusicianProfileController::class, 'show'])
     ->name('musician.profile.show');
+
+Route::view('search', 'search')->name('search');

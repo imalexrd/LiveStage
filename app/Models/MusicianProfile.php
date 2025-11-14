@@ -10,6 +10,8 @@ class MusicianProfile extends Model
 {
     use HasFactory;
 
+    // TODO: The creating event is not firing as expected when using the seeder.
+    // The uuid is not being automatically generated. This needs further investigation.
     protected static function boot()
     {
         parent::boot();
@@ -29,6 +31,9 @@ class MusicianProfile extends Model
         'location_state',
         'base_price_per_hour',
         'banner_image_path',
+        'latitude',
+        'longitude',
+        'is_approved',
     ];
 
     public function manager()
@@ -39,5 +44,15 @@ class MusicianProfile extends Model
     public function media()
     {
         return $this->hasMany(Media::class);
+    }
+
+    public function genres()
+    {
+        return $this->belongsToMany(Genre::class, 'genre_musician_profile');
+    }
+
+    public function eventTypes()
+    {
+        return $this->belongsToMany(EventType::class, 'event_type_musician_profile');
     }
 }
