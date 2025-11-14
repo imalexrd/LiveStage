@@ -37,6 +37,11 @@ class User extends Authenticatable implements FilamentUser
         return $this->hasOne(MusicianProfile::class, 'manager_id');
     }
 
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'client_id');
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *

@@ -55,4 +55,9 @@ class MusicianProfile extends Model
     {
         return $this->belongsToMany(EventType::class, 'event_type_musician_profile');
     }
+
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class);
+    }
 }

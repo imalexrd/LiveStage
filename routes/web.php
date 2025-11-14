@@ -28,3 +28,13 @@ Route::get('/profiles/{uuid}', [MusicianProfileController::class, 'show'])
     ->name('musician.profile.show');
 
 Route::view('search', 'search')->name('search');
+
+use App\Http\Controllers\BookingController;
+
+Route::middleware(['auth'])->group(function () {
+    Route::view('bookings', 'bookings')->name('bookings');
+    Route::post('/profiles/{musicianProfile}/book', [BookingController::class, 'store'])->name('bookings.store');
+    Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::put('/bookings/{booking}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
+    Route::put('/bookings/{booking}/reject', [BookingController::class, 'reject'])->name('bookings.reject');
+});
