@@ -40,6 +40,26 @@ class MusicianProfileResource extends Resource
                     ->numeric(),
                 Forms\Components\Toggle::make('is_approved')
                     ->required(),
+                Forms\Components\FileUpload::make('banner_image_path')
+                    ->label('Banner Image')
+                    ->disk('public')
+                    ->directory('banners')
+                    ->image(),
+                Forms\Components\Repeater::make('media')
+                    ->relationship()
+                    ->schema([
+                        Forms\Components\FileUpload::make('file_path')
+                            ->disk('public')
+                            ->required(),
+                        Forms\Components\Select::make('type')
+                            ->options([
+                                'image' => 'Image',
+                                'video' => 'Video',
+                                'audio' => 'Audio',
+                            ])
+                            ->required(),
+                    ])
+                    ->columnSpanFull(),
                 Forms\Components\TextInput::make('uuid')
                     ->label('UUID')
                     ->disabled()
