@@ -119,10 +119,6 @@ class MusicianProfileSeeder extends Seeder
                 'role' => 'manager',
             ]);
 
-            // Assign a placeholder profile picture
-            $newManager->profile_picture_url = 'https://i.pravatar.cc/150?u=' . $newManager->email;
-            $newManager->save();
-
             $newProfile = MusicianProfile::create([
                 'uuid' => Str::uuid(),
                 'manager_id' => $newManager->id,
@@ -134,7 +130,6 @@ class MusicianProfileSeeder extends Seeder
                 'longitude' => $faker->longitude,
                 'base_price_per_hour' => $faker->numberBetween(100, 500),
                 'is_approved' => true,
-                'banner_image_path' => 'https://picsum.photos/seed/' . Str::slug($faker->words(2, true)) . '/1200/400',
             ]);
 
             // Attach random genres and event types
