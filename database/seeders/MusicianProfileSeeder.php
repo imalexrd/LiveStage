@@ -44,8 +44,8 @@ class MusicianProfileSeeder extends Seeder
             $jazz = Genre::where('name', 'Jazz')->first();
             $corporate = EventType::where('name', 'Corporate Events')->first();
             $private = EventType::where('name', 'Private Parties')->first();
-            $profile1->genres()->syncWithoutDetaching([$jazz->id]);
-            $profile1->eventTypes()->syncWithoutDetaching([$corporate->id, $private->id]);
+            if ($jazz) $profile1->genres()->syncWithoutDetaching([$jazz->id]);
+            if ($corporate && $private) $profile1->eventTypes()->syncWithoutDetaching([$corporate->id, $private->id]);
         }
 
         // Create additional managers and profiles for variety
@@ -76,8 +76,8 @@ class MusicianProfileSeeder extends Seeder
         $rock = Genre::where('name', 'Rock')->first();
         $weddings = EventType::where('name', 'Weddings')->first();
         $concerts = EventType::where('name', 'Concerts')->first();
-        $profile2->genres()->syncWithoutDetaching([$rock->id]);
-        $profile2->eventTypes()->syncWithoutDetaching([$weddings->id, $concerts->id]);
+        if ($rock) $profile2->genres()->syncWithoutDetaching([$rock->id]);
+        if ($weddings && $concerts) $profile2->eventTypes()->syncWithoutDetaching([$weddings->id, $concerts->id]);
 
         $manager3 = User::firstOrCreate(
             ['email' => 'manager3@example.com'],
@@ -107,8 +107,8 @@ class MusicianProfileSeeder extends Seeder
         $electronic = Genre::where('name', 'Electronic')->first();
         $festivals = EventType::where('name', 'Festivals')->first();
         $lounge = EventType::where('name', 'Lounge DJs')->first();
-        $profile3->genres()->syncWithoutDetaching([$pop->id, $electronic->id]);
-        $profile3->eventTypes()->syncWithoutDetaching([$festivals->id, $lounge->id]);
+        if ($pop && $electronic) $profile3->genres()->syncWithoutDetaching([$pop->id, $electronic->id]);
+        if ($festivals && $lounge) $profile3->eventTypes()->syncWithoutDetaching([$festivals->id, $lounge->id]);
 
         // Add 10 more bands with placeholder data
         $genres = Genre::all();
@@ -138,8 +138,12 @@ class MusicianProfileSeeder extends Seeder
             ]);
 
             // Attach random genres and event types
-            $newProfile->genres()->attach($genres->random(rand(1, 3))->pluck('id')->toArray());
-            $newProfile->eventTypes()->attach($eventTypes->random(rand(1, 2))->pluck('id')->toArray());
+            if ($genres->isNotEmpty()) {
+                $newProfile->genres()->attach($genres->random(rand(1, min(3, $genres->count())))->pluck('id')->toArray());
+            }
+            if ($eventTypes->isNotEmpty()) {
+                $newProfile->eventTypes()->attach($eventTypes->random(rand(1, min(2, $eventTypes->count())))->pluck('id')->toArray());
+            }
         }
     }
 }
