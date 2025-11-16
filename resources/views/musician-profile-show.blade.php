@@ -69,12 +69,12 @@
                             @forelse ($musician->media as $media)
                                 <div class="group relative">
                                     @if ($media->type === 'image')
-                                        <img src="{{ asset('storage/' . $media->path) }}" alt="{{ $musician->artist_name }}" class="w-full h-40 object-cover rounded-md">
+                                        <img src="{{ asset('storage/' . $media->file_path) }}" alt="{{ $musician->artist_name }}" class="w-full h-40 object-cover rounded-md">
                                     @elseif ($media->type === 'video')
-                                        <video src="{{ asset('storage/' . $media->path) }}" controls class="w-full h-40 object-cover rounded-md"></video>
+                                        <video src="{{ asset('storage/' . $media->file_path) }}" controls class="w-full h-40 object-cover rounded-md"></video>
                                     @elseif ($media->type === 'audio')
                                         <div class="bg-gray-800 p-4 rounded-md h-40 flex flex-col justify-center">
-                                            <audio src="{{ asset('storage/' . $media->path) }}" controls class="w-full"></audio>
+                                            <audio src="{{ asset('storage/' . $media->file_path) }}" controls class="w-full"></audio>
                                         </div>
                                     @endif
                                 </div>
