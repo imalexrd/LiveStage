@@ -1,33 +1,49 @@
-# Propuesta de Próximo Hito: Hito 8 - Mejora de la Búsqueda y Experiencia de Usuario
+# Propuesta de Próximo Hito: Hito 9 - Ubicación de Eventos con Google Maps
 
 ## 1. Contexto General
 
-Actualmente, la plataforma tiene una sección de "Dashboard" que sirve como una página de inicio general, pero la funcionalidad principal para los clientes es la búsqueda de músicos. Para crear una experiencia de usuario más directa e intuitiva, el siguiente paso es transformar el "Dashboard" en una página de "Búsqueda" dedicada.
-
-Este hito se centrará en mejorar la funcionalidad y el diseño de la página de búsqueda, haciéndola más atractiva, responsive y mobile-friendly.
+Actualmente, el proceso de booking no permite a los clientes especificar la ubicación exacta del evento. Para mejorar la claridad y la comunicación entre clientes y músicos, se añadirá una funcionalidad que permite a los clientes, de forma opcional, añadir una dirección precisa al crear o gestionar una solicitud de booking. Esta funcionalidad se integrará con la API de Google Maps para ofrecer una experiencia de usuario fluida y precisa en la captura de direcciones.
 
 ## 2. Tareas a Desarrollar
 
-### 2.1. Transformar el "Dashboard" en la Página de "Búsqueda"
+### 2.1. Actualizaciones de la Base de Datos
 
--   **Tarea:** Reemplazar la vista actual del dashboard con la funcionalidad de búsqueda de músicos.
+-   **Tarea:** Modificar la tabla `bookings` para almacenar la información de la ubicación.
 -   **Detalles:**
-    -   **Enrutamiento:** Modificar las rutas de la aplicación para que la ruta principal (`/dashboard`) ahora cargue la vista de búsqueda de músicos.
-    -   **Navegación:** Actualizar los enlaces de navegación para que apunten a la nueva página de "Búsqueda" en lugar del "Dashboard".
+    -   Crear una nueva migración para añadir las siguientes columnas a la tabla `bookings`:
+        -   `location_address` (String, Nullable): Para almacenar la dirección de texto.
+        -   `location_latitude` (Decimal, Nullable): Para almacenar la latitud.
+        -   `location_longitude` (Decimal, Nullable): Para almacenar la longitud.
+    -   Actualizar el modelo `Booking` para que los nuevos campos sean `fillable`.
 
-### 2.2. Mejorar la Interfaz de Usuario (UI) de la Página de Búsqueda
+### 2.2. Mejoras en el Backend
 
--   **Tarea:** Rediseñar la página de búsqueda para que sea más moderna, intuitiva y completamente responsive.
+-   **Tarea:** Actualizar la lógica del backend para manejar la nueva información de ubicación.
 -   **Detalles:**
-    -   **Diseño Mobile-First:** Adoptar un enfoque de diseño mobile-first para garantizar que la página de búsqueda se vea y funcione perfectamente en dispositivos móviles.
-    -   **Filtros Mejorados:** Reorganizar los filtros de búsqueda en un panel lateral o un menú desplegable para que sean más accesibles en pantallas pequeñas.
-    -   **Resultados de Búsqueda:** Diseñar tarjetas de resultados de búsqueda más atractivas y con la información clave del músico (foto, nombre, género, ubicación, precio) de un vistazo.
-    -   **Layout General:** Implementar un layout limpio y moderno utilizando Tailwind CSS, con una clara separación entre los filtros y los resultados.
+    -   Modificar el `BookingController` para validar y guardar los nuevos campos de ubicación al crear y actualizar una reserva. La validación debe ser opcional.
+    -   Asegurarse de que el `BookingRequestForm` y cualquier otro componente de Livewire relevante manejen los nuevos campos.
+
+### 2.3. Integración de Google Maps en el Frontend
+
+-   **Tarea:** Implementar la API de Google Maps Places Autocomplete en el formulario de booking.
+-   **Detalles:**
+    -   **Configuración de API:** Añadir la clave de la API de Google Maps al archivo `.env` y cargar el script de Google Maps en las vistas relevantes.
+    -   **Campo de Autocompletado:** En el formulario de creación de booking (`BookingRequestForm`), reemplazar el campo de texto de la ubicación por un campo de autocompletado de Google Places.
+    -   **Población de Campos:** Al seleccionar una dirección, el formulario deberá capturar la dirección de texto, la latitud y la longitud, y guardarlos en campos ocultos que se enviarán al backend.
+    -   **Componente Reutilizable:** Considerar la creación de un componente de Blade para el input de Google Maps, de modo que pueda ser reutilizado fácilmente.
+
+### 2.4. Visualización y Edición de la Ubicación
+
+-   **Tarea:** Permitir a los usuarios ver y editar la ubicación después de haber creado la reserva.
+-   **Detalles:**
+    -   **Vista de Detalles del Booking:** En la página de detalles del booking (`bookings.show`), mostrar la ubicación del evento en un mapa estático de Google Maps si ha sido proporcionada.
+    -   **Funcionalidad de Edición:** Añadir un botón de "Añadir/Editar Ubicación" en la página de detalles del booking. Este botón deberá abrir un modal con el mismo componente de autocompletado de Google Maps para que el cliente pueda añadir o actualizar la dirección.
 
 ## 3. Punto de Verificación del Hito
 
 El hito se considerará completado cuando se cumplan los siguientes puntos:
-1.  La página del "Dashboard" ha sido reemplazada por la página de "Búsqueda".
-2.  La página de búsqueda es completamente responsive y se ve bien en dispositivos móviles.
-3.  Los filtros de búsqueda son fáciles de usar en todos los tamaños de pantalla.
-4.  La funcionalidad de búsqueda existente sigue operando correctamente.
+1.  La base de datos ha sido actualizada con los nuevos campos de ubicación.
+2.  Los clientes pueden añadir opcionalmente una ubicación al crear una nueva solicitud de booking.
+3.  El campo de ubicación utiliza la API de Google Maps Places Autocomplete.
+4.  La ubicación del evento, si existe, se muestra en la página de detalles del booking.
+5.  Los clientes pueden añadir o actualizar la ubicación desde la página de detalles del booking.

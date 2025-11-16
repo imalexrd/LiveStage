@@ -98,7 +98,24 @@ La estructura está optimizada para la relación uno-a-uno entre Manager y Perfi
 *   **Relaciones Eloquent:**
     *   `belongsTo(MusicianProfile::class)`
 
-**Tabla: `bookings`, `payments`, `reviews`, `media`, `categories`, `genres` y las tablas de mensajería permanecen estructuralmente iguales a la versión anterior, ya que sus relaciones con `musician_profiles` y `users` son correctas y se adaptan a este modelo.**
+**Tabla: `bookings` | Modelo: `Booking`**
+*   `id` (PK)
+*   `client_id` (FK a `users.id`)
+*   `musician_profile_id` (FK a `musician_profiles.id`)
+*   `event_date` (Date)
+*   `start_time` (Time)
+*   `end_time` (Time)
+*   `status` (Enum: `pending`, `confirmed`, `cancelled`, `completed`)
+*   `total_price` (Decimal)
+*   `location_address` (String, Nullable): Dirección del evento, capturada con Google Maps.
+*   `location_latitude` (Decimal, Nullable): Latitud para funcionalidades de mapa.
+*   `location_longitude` (Decimal, Nullable): Longitud para funcionalidades de mapa.
+*   `timestamps`
+*   **Relaciones Eloquent:**
+    *   `belongsTo(User::class, 'client_id')`
+    *   `belongsTo(MusicianProfile::class)`
+
+**Tabla: `payments`, `reviews`, `media`, `categories`, `genres` y las tablas de mensajería permanecen estructuralmente iguales a la versión anterior, ya que sus relaciones con `musician_profiles` y `users` son correctas y se adaptan a este modelo.**
 
 ---
 
