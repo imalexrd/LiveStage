@@ -126,7 +126,7 @@
 
         <!-- Mobile Filters Modal -->
         <div x-show="filtersOpen" class="fixed inset-0 z-30 flex items-center justify-center bg-black bg-opacity-50 md:hidden" @click.self="filtersOpen = false">
-            <div class="bg-white rounded-lg shadow-xl w-11/12 max-w-lg mx-auto p-6">
+            <div class="bg-white rounded-lg shadow-xl w-11/12 max-w-lg mx-auto p-6 max-h-[85vh] overflow-y-auto">
                 <!-- Filters Content (Duplicate for Mobile) -->
                 <h3 class="text-xl font-bold mb-6">Filters</h3>
                 <form>
