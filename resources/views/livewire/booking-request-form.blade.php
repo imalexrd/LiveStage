@@ -13,9 +13,9 @@
         </div>
 
         <div class="mb-4">
-            <label for="event_location" class="block text-sm font-medium text-gray-700">Event Location</label>
-            <input wire:model="event_location" type="text" id="event_location" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm">
-            @error('event_location') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+            <label for="address" class="block text-sm font-medium text-gray-700">Event Location (Optional)</label>
+            <x-google-places-autocomplete />
+            @error('location_address') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
         </div>
 
         <div class="mb-4">

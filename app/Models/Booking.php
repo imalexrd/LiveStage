@@ -13,10 +13,12 @@ class Booking extends Model
         'client_id',
         'musician_profile_id',
         'event_date',
-        'event_location',
         'event_details',
         'status',
         'total_price',
+        'location_address',
+        'location_latitude',
+        'location_longitude',
     ];
 
     public function client()

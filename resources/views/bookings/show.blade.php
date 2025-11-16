@@ -23,8 +23,20 @@
                         @endif
                     </p>
                     <p><strong>Event Date:</strong> {{ $booking->event_date }}</p>
-                    <p><strong>Event Location:</strong> {{ $booking->event_location }}</p>
                     <p><strong>Event Details:</strong> {{ $booking->event_details }}</p>
+                    <p><strong>Location:</strong> {{ $booking->location_address ?? 'Not specified' }}</p>
+
+                    @if ($booking->location_latitude && $booking->location_longitude)
+                        <div class="mt-4">
+                            <img src="https://maps.googleapis.com/maps/api/staticmap?center={{ $booking->location_latitude }},{{ $booking->location_longitude }}&zoom=12&size=600x300&maptype=roadmap&markers=color:red%7C{{ $booking->location_latitude }},{{ $booking->location_longitude }}&key={{ config('services.google_maps.api_key') }}" alt="Event Location">
+                        </div>
+                    @endif
+
+                    @if (auth()->user()->role === 'client')
+                        <div class="mt-4">
+                            @livewire('edit-booking-location', ['booking' => $booking])
+                        </div>
+                    @endif
                     <p><strong>Status:</strong> {{ ucfirst($booking->status) }}</p>
 
                     @if (auth()->user()->role === 'manager' && $booking->status === 'pending')
