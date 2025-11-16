@@ -12,7 +12,6 @@ class MusicianSearch extends Component
 {
     public $search = '';
     public $location = '';
-    public $radius = 10;
     public $selectedGenres = [];
     public $selectedEventTypes = [];
     public $minPrice = 0;
@@ -34,9 +33,14 @@ class MusicianSearch extends Component
         $this->eventTypes = EventType::all();
     }
 
+    public function clearFilters()
+    {
+        $this->reset(['search', 'location', 'selectedGenres', 'selectedEventTypes', 'minPrice', 'maxPrice', 'genreMatch', 'eventTypeMatch']);
+    }
+
     public function render()
     {
-        $query = MusicianProfile::query()->where('is_approved', true);
+        $query = MusicianProfile::query()->where('is_approved', true)->with('genres');
 
         if ($this->search) {
             $query->where(function ($q) {
@@ -52,13 +56,13 @@ class MusicianSearch extends Component
         if (!empty($this->selectedGenres)) {
             $query->whereHas('genres', function ($q) {
                 $q->whereIn('genres.id', $this->selectedGenres);
-            }, $this->genreMatch === 'all' ? '=' : '>=', 1);
+            }, $this->genreMatch === 'all' ? '=' : '>=', $this->genreMatch === 'all' ? count($this->selectedGenres) : 1);
         }
 
         if (!empty($this->selectedEventTypes)) {
             $query->whereHas('eventTypes', function ($q) {
                 $q->whereIn('event_types.id', $this->selectedEventTypes);
-            }, $this->eventTypeMatch === 'all' ? '=' : '>=', 1);
+            }, $this->eventTypeMatch === 'all' ? '=' : '>=', $this->eventTypeMatch === 'all' ? count($this->selectedEventTypes) : 1);
         }
 
         $query->whereBetween('base_price_per_hour', [$this->minPrice, $this->maxPrice]);
