@@ -13,7 +13,9 @@ class BookingController extends Controller
     {
         $request->validate([
             'event_date' => 'required|date|after:today',
-            'event_location' => 'required|string|max:255',
+            'location_address' => 'required|string|max:255',
+            'location_latitude' => 'required|numeric',
+            'location_longitude' => 'required|numeric',
             'event_details' => 'required|string',
         ]);
 
@@ -21,7 +23,9 @@ class BookingController extends Controller
         $booking->client_id = Auth::id();
         $booking->musician_profile_id = $musicianProfile->id;
         $booking->event_date = $request->event_date;
-        $booking->event_location = $request->event_location;
+        $booking->location_address = $request->location_address;
+        $booking->location_latitude = $request->location_latitude;
+        $booking->location_longitude = $request->location_longitude;
         $booking->event_details = $request->event_details;
         $booking->status = 'pending';
         $booking->save();
@@ -40,7 +44,7 @@ class BookingController extends Controller
     public function approve(Booking $booking)
     {
         $this->authorize('update', $booking);
-        $booking->status = 'accepted';
+        $booking->status = 'confirmed';
         $booking->save();
 
         // TODO: Add notification to client
@@ -51,7 +55,7 @@ class BookingController extends Controller
     public function reject(Booking $booking)
     {
         $this->authorize('update', $booking);
-        $booking->status = 'rejected';
+        $booking->status = 'cancelled';
         $booking->save();
 
         // TODO: Add notification to client

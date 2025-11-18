@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\MusicianProfile;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
+use App\Models\Booking;
 
 class BookingTest extends TestCase
 {
@@ -19,17 +20,22 @@ class BookingTest extends TestCase
 
         $this->actingAs($client);
 
-        $response = $this->post(route('bookings.store', $musician), [
+        $bookingData = [
             'event_date' => '2025-12-25',
-            'event_location' => 'Test Location',
+            'location_address' => '123 Main St, Anytown, USA',
+            'location_latitude' => 40.7128,
+            'location_longitude' => -74.0060,
             'event_details' => 'Test event details',
-        ]);
+        ];
+
+        $response = $this->post(route('bookings.store', $musician), $bookingData);
 
         $response->assertRedirect();
         $this->assertDatabaseHas('bookings', [
             'client_id' => $client->id,
             'musician_profile_id' => $musician->id,
             'status' => 'pending',
+            'location_address' => '123 Main St, Anytown, USA',
         ]);
     }
 
@@ -38,11 +44,9 @@ class BookingTest extends TestCase
         $client = User::factory()->create(['role' => 'client']);
         $manager = User::factory()->create(['role' => 'manager']);
         $musician = MusicianProfile::factory()->create(['manager_id' => $manager->id]);
-        $booking = $musician->bookings()->create([
+        $booking = Booking::factory()->create([
             'client_id' => $client->id,
-            'event_date' => '2025-12-25',
-            'event_location' => 'Test Location',
-            'event_details' => 'Test event details',
+            'musician_profile_id' => $musician->id,
             'status' => 'pending',
         ]);
 
@@ -53,7 +57,7 @@ class BookingTest extends TestCase
         $response->assertRedirect();
         $this->assertDatabaseHas('bookings', [
             'id' => $booking->id,
-            'status' => 'accepted',
+            'status' => 'confirmed',
         ]);
     }
 
@@ -62,11 +66,9 @@ class BookingTest extends TestCase
         $client = User::factory()->create(['role' => 'client']);
         $manager = User::factory()->create(['role' => 'manager']);
         $musician = MusicianProfile::factory()->create(['manager_id' => $manager->id]);
-        $booking = $musician->bookings()->create([
+        $booking = Booking::factory()->create([
             'client_id' => $client->id,
-            'event_date' => '2025-12-25',
-            'event_location' => 'Test Location',
-            'event_details' => 'Test event details',
+            'musician_profile_id' => $musician->id,
             'status' => 'pending',
         ]);
 
@@ -77,7 +79,7 @@ class BookingTest extends TestCase
         $response->assertRedirect();
         $this->assertDatabaseHas('bookings', [
             'id' => $booking->id,
-            'status' => 'rejected',
+            'status' => 'cancelled',
         ]);
     }
 }

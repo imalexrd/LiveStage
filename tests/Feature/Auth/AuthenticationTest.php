@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
+use App\Models\MusicianProfile;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Livewire\Volt\Volt;
@@ -56,7 +57,9 @@ class AuthenticationTest extends TestCase
 
     public function test_dashboard_page_can_be_rendered(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->create(['role' => 'client']);
+        MusicianProfile::factory()->create(['is_approved' => true]);
+
 
         $this->actingAs($user);
 
@@ -64,6 +67,6 @@ class AuthenticationTest extends TestCase
 
         $response
             ->assertOk()
-            ->assertSee('Dashboard');
+            ->assertSeeText('Available Musicians');
     }
 }
