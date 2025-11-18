@@ -6,6 +6,7 @@
             marker: null,
             geocoder: null,
             mapInitialized: false,
+            selectedLocation: null,
             init() {
                 this.$watch('show', (value) => {
                     if (value && !this.mapInitialized) {
@@ -13,6 +14,9 @@
                             this.initMap();
                             this.mapInitialized = true;
                         });
+                    }
+                    if (!value) {
+                        this.selectedLocation = null;
                     }
                 });
             },
@@ -48,7 +52,6 @@
                 const pacInput = document.getElementById('pac-input');
                 pacInput.appendChild(autocomplete);
 
-
                 autocomplete.addEventListener('gmp-placechange', () => {
                     const place = autocomplete.place;
                     if (!place.geometry || !place.geometry.location) {
@@ -72,10 +75,6 @@
             geocodePosition(latLng) {
                 this.geocoder.geocode({ latLng: latLng }, (results, status) => {
                     if (status === 'OK' && results[0]) {
-                        $wire.set('address', results[0].formatted_address);
-                        $wire.set('latitude', results[0].geometry.location.lat());
-                        $wire.set('longitude', results[0].geometry.location.lng());
-
                         let city = '';
                         let state = '';
                         for (const component of results[0].address_components) {
@@ -86,10 +85,20 @@
                                 state = component.short_name;
                             }
                         }
-                        $wire.set('city', city);
-                        $wire.set('state', state);
+                        this.selectedLocation = {
+                            address: results[0].formatted_address,
+                            latitude: results[0].geometry.location.lat(),
+                            longitude: results[0].geometry.location.lng(),
+                            city: city,
+                            state: state
+                        };
                     }
                 });
+            },
+            dispatchLocation() {
+                if (this.selectedLocation) {
+                    $wire.selectLocation(this.selectedLocation);
+                }
             }
         }"
         x-init="init()"
@@ -130,16 +139,16 @@
                 </div>
 
                 <div class="mt-4">
-                    <p><strong>Selected Address:</strong> <span x-text="$wire.address"></span></p>
-                    <p><strong>Latitude:</strong> <span x-text="$wire.latitude"></span></p>
-                    <p><strong>Longitude:</strong> <span x-t ext="$wire.longitude"></span></p>
+                    <p><strong>Selected Address:</strong> <span x-text="selectedLocation ? selectedLocation.address : 'None'"></span></p>
+                    <p><strong>Latitude:</strong> <span x-text="selectedLocation ? selectedLocation.latitude : 'None'"></span></p>
+                    <p><strong>Longitude:</strong> <span x-text="selectedLocation ? selectedLocation.longitude : 'None'"></span></p>
                 </div>
 
                 <div class="mt-6 flex justify-end">
                     <x-secondary-button @click="show = false">
                         {{ __('Cancel') }}
                     </x-secondary-button>
-                    <x-primary-button class="ml-3" @click="$wire.selectLocation()">
+                    <x-primary-button class="ml-3" @click="dispatchLocation()">
                         {{ __('Select Location') }}
                     </x-primary-button>
                 </div>

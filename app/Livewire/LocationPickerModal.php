@@ -8,11 +8,6 @@ use Livewire\Attributes\On;
 class LocationPickerModal extends Component
 {
     public $show = false;
-    public $address;
-    public $latitude;
-    public $longitude;
-    public $city;
-    public $state;
 
     #[On('openLocationPicker')]
     public function openLocationPicker()
@@ -20,15 +15,9 @@ class LocationPickerModal extends Component
         $this->show = true;
     }
 
-    public function selectLocation()
+    public function selectLocation($location)
     {
-        $this->dispatch('locationSelected', [
-            'address' => $this->address,
-            'latitude' => $this->latitude,
-            'longitude' => $this->longitude,
-            'city' => $this->city,
-            'state' => $this->state,
-        ]);
+        $this->dispatch('locationSelected', $location);
         $this->show = false;
     }
 

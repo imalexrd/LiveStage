@@ -18,6 +18,8 @@
                 {{ $location_address ? $location_address : __('Set Base Location on Map') }}
             </x-secondary-button>
             @error('location_address') <span class="text-danger">{{ $message }}</span> @enderror
+            @error('latitude') <span class="text-danger">{{ $message }}</span> @enderror
+            @error('longitude') <span class="text-danger">{{ $message }}</span> @enderror
         </div>
 
         <div class="mt-4">
