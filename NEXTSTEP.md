@@ -38,25 +38,28 @@ Implementaremos un patrón de **Capa de Servicios** (Service Layer).
 
 ## Prompt para el Agente de IA: Instrucciones de Ejecución
 
-"Hola. Tu tarea es refactorizar esta aplicación Laravel para centralizar la lógica de negocio en una capa de servicios. Sigue el plan detallado en este documento (`REFACTOR.md`) y ejecuta las fases en orden. No avances a la siguiente fase hasta completar la anterior y asegurarte de que la funcionalidad existente no se ha roto.
+"Hola. Tu tarea es continuar la refactorización de esta aplicación Laravel para centralizar la lógica de negocio en una capa de servicios. La Fase 1 ya ha sido completada. Ahora debes enfocarte en la Fase 2.
 
-**Fase 1: Crear la Capa de Servicios y Refactorizar los Bookings**
+**Fase 1: Crear la Capa de Servicios y Refactorizar los Bookings (¡Completada!)**
 
-1.  Crea un nuevo directorio: `app/Services`.
-2.  Dentro de `app/Services`, crea un nuevo archivo llamado `BookingService.php`.
-3.  Analiza el componente `app/Livewire/BookingRequestForm.php`. Identifica toda la lógica relacionada con la creación y validación de una reserva (`Booking`).
-4.  Mueve esa lógica al `BookingService`. Crea un método público como `createBooking(User $client, MusicianProfile $profile, array $data): Booking`. Este método debe encargarse de crear y guardar la reserva en la base de datos.
-5.  Refactoriza el componente `app/Livewire/BookingRequestForm.php` para que inyecte y utilice `BookingService` para crear la reserva. El componente solo debe encargarse de recoger los datos del formulario y llamar al servicio.
-6.  Verifica que el formulario de solicitud de reserva sigue funcionando correctamente después de los cambios.
+-   [x] Se ha creado el directorio `app/Services`.
+-   [x] Se ha creado `app/Services/BookingService.php`.
+-   [x] La lógica de creación de reservas ha sido movida desde `BookingRequestForm` al `BookingService`.
+-   [x] El componente `BookingRequestForm` ha sido refactorizado para usar el servicio.
+-   [x] Se han añadido tests para verificar la nueva implementación y el correcto funcionamiento del formulario.
 
-**Fase 2: Refactorizar los Perfiles de Músico**
+**Contexto Adicional de la Fase 1:** Para completar esta fase, fue necesario configurar completamente el entorno de pruebas desde cero. Esto incluyó instalar dependencias del sistema (como `composer` y extensiones de PHP), configurar una base de datos de prueba (`laravel_test`), crear un archivo `.env.testing`, y solucionar varios errores de base de datos relacionados con el esquema y el mass assignment. Se han añadido tests unitarios y de feature para asegurar la calidad. El archivo `INIT.md` contiene las instrucciones detalladas para replicar el entorno.
+
+---
+
+**Fase 2: Refactorizar los Perfiles de Músico (Próximo Objetivo)**
 
 1.  Crea un nuevo servicio: `app/Services/MusicianProfileService.php`.
 2.  Analiza los componentes `app/Livewire/MusicianProfileForm.php` y `app/Livewire/MusicianSearch.php`.
 3.  Mueve la lógica para crear/actualizar un perfil de músico desde `MusicianProfileForm` al `MusicianProfileService`. Crea un método como `updateProfile(User $user, array $data): MusicianProfile`.
 4.  Mueve la lógica de búsqueda y filtrado de músicos desde `MusicianSearch` al `MusicianProfileService`. Crea un método como `search(array $filters)`.
 5.  Refactoriza ambos componentes de Livewire para que utilicen el `MusicianProfileService`.
-6.  Asegúrate de que la edición de perfiles y la búsqueda de músicos sigan funcionando como antes.
+6.  Asegúrate de que la edición de perfiles y la búsqueda de músicos sigan funcionando como antes. Añade tests si es necesario.
 
 **Fase 3: Introducir Controladores de API**
 

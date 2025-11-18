@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
 
@@ -18,6 +19,7 @@ class MusicianProfileFactory extends Factory
     public function definition(): array
     {
         return [
+            'manager_id' => User::factory()->create(['role' => 'manager']),
             'uuid' => Str::uuid(),
             'artist_name' => $this->faker->name,
             'bio' => $this->faker->paragraph,
