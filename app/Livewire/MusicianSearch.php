@@ -2,11 +2,10 @@
 
 namespace App\Livewire;
 
+use App\Services\MusicianProfileService;
 use Livewire\Component;
-use App\Models\MusicianProfile;
 use App\Models\Genre;
 use App\Models\EventType;
-use Illuminate\Validation\Rule;
 use Livewire\Attributes\On;
 
 class MusicianSearch extends Component
@@ -47,58 +46,27 @@ class MusicianSearch extends Component
         $this->dispatch('openLocationPicker');
     }
 
-    public function render()
+    public function render(MusicianProfileService $profileService)
     {
-        $this->searchExpanded = false;
-        $query = MusicianProfile::query()->where('is_approved', true);
+        $filters = [
+            'search' => $this->search,
+            'latitude' => $this->latitude,
+            'longitude' => $this->longitude,
+            'distance' => $this->distance,
+            'selectedGenres' => $this->selectedGenres,
+            'selectedEventTypes' => $this->selectedEventTypes,
+            'minPrice' => $this->minPrice,
+            'maxPrice' => $this->maxPrice,
+            'genreMatch' => $this->genreMatch,
+            'eventTypeMatch' => $this->eventTypeMatch,
+        ];
 
-        if ($this->search) {
-            $query->where(function ($q) {
-                $q->where('artist_name', 'like', '%' . $this->search . '%')
-                  ->orWhere('bio', 'like', '%' . $this->search . '%');
-            });
-        }
+        $result = $profileService->search($filters);
 
-        if (!empty($this->selectedGenres)) {
-            $query->whereHas('genres', function ($q) {
-                $q->whereIn('genres.id', $this->selectedGenres);
-            }, $this->genreMatch === 'all' ? '=' : '>=', 1);
-        }
-
-        if (!empty($this->selectedEventTypes)) {
-            $query->whereHas('eventTypes', function ($q) {
-                $q->whereIn('event_types.id', $this->selectedEventTypes);
-            }, $this->eventTypeMatch === 'all' ? '=' : '>=', 1);
-        }
-
-        $query->whereBetween('base_price_per_hour', [$this->minPrice, $this->maxPrice]);
-
-        if ($this->latitude && $this->longitude) {
-            $query->selectRaw(
-                '*, ( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
-                [$this->latitude, $this->longitude, $this->latitude]
-            );
-
-            $musiciansInRadius = (clone $query)
-                ->whereRaw('( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) < ?', [$this->latitude, $this->longitude, $this->latitude, $this->distance])
-                ->orderBy('distance')
-                ->get();
-
-            if ($musiciansInRadius->isNotEmpty()) {
-                $musicians = $musiciansInRadius;
-            } else {
-                $this->searchExpanded = true;
-                $musicians = (clone $query)
-                    ->orderBy('distance')
-                    ->limit(5)
-                    ->get();
-            }
-        } else {
-            $musicians = $query->get();
-        }
+        $this->searchExpanded = $result['searchExpanded'];
 
         return view('livewire.musician-search', [
-            'musicians' => $musicians,
+            'musicians' => $result['musicians'],
         ]);
     }
 }
