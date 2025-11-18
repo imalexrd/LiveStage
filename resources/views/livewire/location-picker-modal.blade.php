@@ -19,11 +19,12 @@
             async initMap() {
                 const { Map } = await google.maps.importLibrary('maps');
                 const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
-                const { Autocomplete } = await google.maps.importLibrary('places');
+                const { PlaceAutocompleteElement } = await google.maps.importLibrary('places');
 
                 this.map = new Map(document.getElementById('map'), {
                     center: { lat: -34.397, lng: 150.644 },
                     zoom: 8,
+                    mapId: '{{ config('services.google.maps_map_id') }}',
                 });
 
                 this.geocoder = new google.maps.Geocoder();
@@ -43,15 +44,13 @@
                     this.geocodePosition(e.latLng);
                 });
 
-                const input = document.getElementById('pac-input');
-                const autocomplete = new Autocomplete(input, {
-                    fields: ['geometry', 'name'],
-                });
+                const autocomplete = new PlaceAutocompleteElement();
+                const pacInput = document.getElementById('pac-input');
+                pacInput.appendChild(autocomplete);
 
-                autocomplete.bindTo('bounds', this.map);
 
-                autocomplete.addListener('place_changed', () => {
-                    const place = autocomplete.getPlace();
+                autocomplete.addEventListener('gmp-placechange', () => {
+                    const place = autocomplete.place;
                     if (!place.geometry || !place.geometry.location) {
                         return;
                     }
@@ -113,7 +112,7 @@
                 </div>
 
                 <div class="mt-4">
-                    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+                    <div id="pac-input"></div>
                     <div id="map" style="height: 400px;"></div>
                 </div>
 
