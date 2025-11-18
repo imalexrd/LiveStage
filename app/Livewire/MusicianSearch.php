@@ -11,8 +11,9 @@ use Illuminate\Validation\Rule;
 class MusicianSearch extends Component
 {
     public $search = '';
-    public $location = '';
-    public $radius = 10;
+    public $latitude;
+    public $longitude;
+    public $distance = 50;
     public $selectedGenres = [];
     public $selectedEventTypes = [];
     public $minPrice = 0;
@@ -22,11 +23,6 @@ class MusicianSearch extends Component
 
     public $genres;
     public $eventTypes;
-    public $supportedCities = [
-        'New York',
-        'Los Angeles',
-        'Miami',
-    ];
 
     public function mount()
     {
@@ -45,8 +41,13 @@ class MusicianSearch extends Component
             });
         }
 
-        if ($this->location) {
-            $query->where('location_city', $this->location);
+        if ($this->latitude && $this->longitude) {
+            $query->selectRaw(
+                '*, ( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
+                [$this->latitude, $this->longitude, $this->latitude]
+            )
+            ->having('distance', '<', $this->distance)
+            ->orderBy('distance');
         }
 
         if (!empty($this->selectedGenres)) {

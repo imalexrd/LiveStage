@@ -1,4 +1,4 @@
-<div x-data="{ filtersOpen: false }">
+<div x-data="{ filtersOpen: false }" x-init="getCurrentLocation()">
     <!-- Page Content -->
     <div class="relative">
         <!-- Mobile Filter Button -->
@@ -24,12 +24,18 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <select wire:model.live="location" id="location" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">All Cities</option>
-                            @foreach($supportedCities as $city)
-                                <option value="{{ $city }}">{{ $city }}</option>
-                            @endforeach
-                        </select>
+                        <input id="location-input" type="text" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter a location">
+                        <button type="button" id="use-location-btn" class="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Use my current location</button>
+                    </div>
+
+                    <!-- Distance -->
+                    <div class="mb-6">
+                        <label for="distance" class="block text-sm font-semibold text-gray-700 mb-2">Distance</label>
+                        <input type="range" wire:model.live="distance" min="1" max="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-sm text-gray-600 mt-2">
+                            <span>1 mile</span>
+                            <span>50 miles</span>
+                        </div>
                     </div>
 
                     <!-- Genres -->
@@ -105,7 +111,12 @@
                                 <img src="{{ $musician->banner_image_path ? asset('storage/' . $musician->banner_image_path) : 'https://via.placeholder.com/300x200' }}" alt="{{ $musician->artist_name }}" class="w-full h-48 object-cover">
                                 <div class="p-6">
                                     <h4 class="text-2xl font-bold text-gray-900 mb-2">{{ $musician->artist_name }}</h4>
-                                    <p class="text-gray-600 text-sm mb-4">{{ $musician->location_city }}, {{ $musician->location_state }}</p>
+                                    <p class="text-gray-600 text-sm mb-4">
+                                        {{ $musician->location_city }}, {{ $musician->location_state }}
+                                        @if($musician->distance)
+                                            <span class="font-bold">({{ round($musician->distance, 2) }} miles away)</span>
+                                        @endif
+                                    </p>
                                     <div class="flex flex-wrap gap-2 mb-4">
                                         @foreach($musician->genres->take(3) as $genre)
                                             <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">{{ $genre->name }}</span>
@@ -138,13 +149,19 @@
 
                     <!-- Location -->
                     <div class="mb-6">
-                        <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <select wire:model.live="location" id="location" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">All Cities</option>
-                            @foreach($supportedCities as $city)
-                                <option value="{{ $city }}">{{ $city }}</option>
-                            @endforeach
-                        </select>
+                        <label for="location-mobile" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
+                        <input id="location-input-mobile" type="text" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter a location">
+                        <button type="button" id="use-location-btn-mobile" class="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Use my current location</button>
+                    </div>
+
+                    <!-- Distance -->
+                    <div class="mb-6">
+                        <label for="distance-mobile" class="block text-sm font-semibold text-gray-700 mb-2">Distance</label>
+                        <input type="range" wire:model.live="distance" min="1" max="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-sm text-gray-600 mt-2">
+                            <span>1 mile</span>
+                            <span>50 miles</span>
+                        </div>
                     </div>
 
                     <!-- Genres -->
@@ -216,3 +233,50 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+    function initMap() {
+        const locationInput = document.getElementById('location-input');
+        const autocomplete = new google.maps.places.Autocomplete(locationInput);
+        autocomplete.addListener('place_changed', () => {
+            const place = autocomplete.getPlace();
+            if (place.geometry) {
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+                @this.set('latitude', lat);
+                @this.set('longitude', lng);
+            }
+        });
+
+        const locationInputMobile = document.getElementById('location-input-mobile');
+        const autocompleteMobile = new google.maps.places.Autocomplete(locationInputMobile);
+        autocompleteMobile.addListener('place_changed', () => {
+            const place = autocompleteMobile.getPlace();
+            if (place.geometry) {
+                const lat = place.geometry.location.lat();
+                const lng = place.geometry.location.lng();
+                @this.set('latitude', lat);
+                @this.set('longitude', lng);
+            }
+        });
+    }
+
+    function getCurrentLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition((position) => {
+                const lat = position.coords.latitude;
+                const lng = position.coords.longitude;
+                @this.set('latitude', lat);
+                @this.set('longitude', lng);
+            });
+        }
+    }
+
+    document.addEventListener('livewire:load', function () {
+        document.getElementById('use-location-btn').addEventListener('click', getCurrentLocation);
+        document.getElementById('use-location-btn-mobile').addEventListener('click', getCurrentLocation);
+    });
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places&callback=initMap" async defer></script>
+@endpush
