@@ -24,12 +24,9 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <select wire:model.live="location" id="location" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">All Cities</option>
-                            @foreach($supportedCities as $city)
-                                <option value="{{ $city }}">{{ $city }}</option>
-                            @endforeach
-                        </select>
+                        <button type="button" wire:click="openLocationModal" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            {{ $selectedAddress ?? 'Select Location' }}
+                        </button>
                     </div>
 
                     <!-- Genres -->
@@ -98,6 +95,11 @@
 
             <!-- Musician Results -->
             <div class="w-full md:w-3/4 md:pl-8">
+                @if($searchExpanded)
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 mb-6" role="alert">
+                        <p>No musicians found in your immediate area. Showing the next closest results.</p>
+                    </div>
+                @endif
                 <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
                     @forelse($musicians as $musician)
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
@@ -105,7 +107,11 @@
                                 <img src="{{ $musician->banner_image_path ? asset('storage/' . $musician->banner_image_path) : 'https://via.placeholder.com/300x200' }}" alt="{{ $musician->artist_name }}" class="w-full h-48 object-cover">
                                 <div class="p-6">
                                     <h4 class="text-2xl font-bold text-gray-900 mb-2">{{ $musician->artist_name }}</h4>
-                                    <p class="text-gray-600 text-sm mb-4">{{ $musician->location_city }}, {{ $musician->location_state }}</p>
+                                    @if($musician->distance)
+                                        <p class="text-gray-600 text-sm mb-4">{{ round($musician->distance, 2) }} miles away</p>
+                                    @else
+                                        <p class="text-gray-600 text-sm mb-4">{{ $musician->location_city }}, {{ $musician->location_state }}</p>
+                                    @endif
                                     <div class="flex flex-wrap gap-2 mb-4">
                                         @foreach($musician->genres->take(3) as $genre)
                                             <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded-full">{{ $genre->name }}</span>
@@ -139,12 +145,9 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <select wire:model.live="location" id="location" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">All Cities</option>
-                            @foreach($supportedCities as $city)
-                                <option value="{{ $city }}">{{ $city }}</option>
-                            @endforeach
-                        </select>
+                        <button type="button" wire:click="openLocationModal" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            {{ $selectedAddress ?? 'Select Location' }}
+                        </button>
                     </div>
 
                     <!-- Genres -->
@@ -215,4 +218,5 @@
             </div>
         </div>
     </div>
+    <livewire:location-picker-modal />
 </div>

@@ -14,8 +14,10 @@
 
         <div class="mb-4">
             <label for="event_location" class="block text-sm font-medium text-gray-700">Event Location</label>
-            <input wire:model="event_location" type="text" id="event_location" class="block w-full mt-1 border-gray-300 rounded-md shadow-sm">
-            @error('event_location') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
+            <button type="button" wire:click="openLocationModal" class="w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                {{ $location_address ?? 'Select Location' }}
+            </button>
+            @error('location_address') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
         </div>
 
         <div class="mb-4">
@@ -24,6 +26,25 @@
             @error('event_details') <span class="text-sm text-red-500">{{ $message }}</span> @enderror
         </div>
 
-        <button type="submit" class="px-4 py-2 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Send Request</button>
+        <div class="p-4 mt-4 bg-gray-100 rounded-lg">
+            <h3 class="text-lg font-medium text-gray-900">Price Breakdown</h3>
+            <div class="mt-2 text-sm text-gray-600">
+                <div class="flex justify-between">
+                    <span>Base Price (1 hour):</span>
+                    <span>${{ number_format($this->musicianProfile->base_price_per_hour, 2) }}</span>
+                </div>
+                <div class="flex justify-between">
+                    <span>Travel Fee:</span>
+                    <span>${{ number_format($this->travelFee, 2) }}</span>
+                </div>
+                <div class="flex justify-between mt-2 pt-2 border-t border-gray-300 font-bold">
+                    <span>Total:</span>
+                    <span>${{ number_format($this->totalPrice, 2) }}</span>
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="px-4 py-2 mt-4 text-white bg-indigo-600 rounded-md hover:bg-indigo-700">Send Request</button>
     </form>
+    <livewire:location-picker-modal />
 </div>

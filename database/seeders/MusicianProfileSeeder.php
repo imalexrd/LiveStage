@@ -37,6 +37,9 @@ class MusicianProfileSeeder extends Seeder
                     'longitude' => -74.0060,
                     'base_price_per_hour' => 250,
                     'is_approved' => true,
+                    'travel_radius_miles' => 50,
+                    'max_travel_distance_miles' => 200,
+                    'price_per_extra_mile' => 2.50,
                 ]
             );
 
@@ -70,6 +73,9 @@ class MusicianProfileSeeder extends Seeder
                 'longitude' => -118.2437,
                 'base_price_per_hour' => 300,
                 'is_approved' => true,
+                'travel_radius_miles' => 100,
+                'max_travel_distance_miles' => 500,
+                'price_per_extra_mile' => 3.00,
             ]
         );
 
@@ -100,6 +106,9 @@ class MusicianProfileSeeder extends Seeder
                 'longitude' => -80.1918,
                 'base_price_per_hour' => 150,
                 'is_approved' => true,
+                'travel_radius_miles' => 25,
+                'max_travel_distance_miles' => 100,
+                'price_per_extra_mile' => 1.50,
             ]
         );
 
@@ -130,6 +139,9 @@ class MusicianProfileSeeder extends Seeder
                 'longitude' => $faker->longitude,
                 'base_price_per_hour' => $faker->numberBetween(100, 500),
                 'is_approved' => true,
+                'travel_radius_miles' => $faker->numberBetween(10, 50),
+                'max_travel_distance_miles' => $faker->numberBetween(100, 500),
+                'price_per_extra_mile' => $faker->randomFloat(2, 1, 5),
             ]);
 
             // Attach random genres and event types

@@ -7,19 +7,23 @@ use App\Models\MusicianProfile;
 use App\Models\Genre;
 use App\Models\EventType;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 
 class MusicianSearch extends Component
 {
     public $search = '';
     public $latitude;
     public $longitude;
+    public $selectedAddress;
     public $distance = 50;
+
     public $selectedGenres = [];
     public $selectedEventTypes = [];
     public $minPrice = 0;
     public $maxPrice = 1000;
     public $genreMatch = 'any';
     public $eventTypeMatch = 'any';
+    public $searchExpanded = false;
 
     public $genres;
     public $eventTypes;
@@ -30,8 +34,22 @@ class MusicianSearch extends Component
         $this->eventTypes = EventType::all();
     }
 
+    #[On('locationSelected')]
+    public function locationSelected($location)
+    {
+        $this->latitude = $location['latitude'];
+        $this->longitude = $location['longitude'];
+        $this->selectedAddress = $location['address'];
+    }
+
+    public function openLocationModal()
+    {
+        $this->dispatch('openLocationPicker');
+    }
+
     public function render()
     {
+        $this->searchExpanded = false;
         $query = MusicianProfile::query()->where('is_approved', true);
 
         if ($this->search) {
@@ -39,15 +57,6 @@ class MusicianSearch extends Component
                 $q->where('artist_name', 'like', '%' . $this->search . '%')
                   ->orWhere('bio', 'like', '%' . $this->search . '%');
             });
-        }
-
-        if ($this->latitude && $this->longitude) {
-            $query->selectRaw(
-                '*, ( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
-                [$this->latitude, $this->longitude, $this->latitude]
-            )
-            ->having('distance', '<', $this->distance)
-            ->orderBy('distance');
         }
 
         if (!empty($this->selectedGenres)) {
@@ -64,7 +73,29 @@ class MusicianSearch extends Component
 
         $query->whereBetween('base_price_per_hour', [$this->minPrice, $this->maxPrice]);
 
-        $musicians = $query->get();
+        if ($this->latitude && $this->longitude) {
+            $query->selectRaw(
+                '*, ( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
+                [$this->latitude, $this->longitude, $this->latitude]
+            );
+
+            $musiciansInRadius = (clone $query)
+                ->whereRaw('( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) < ?', [$this->latitude, $this->longitude, $this->latitude, $this->distance])
+                ->orderBy('distance')
+                ->get();
+
+            if ($musiciansInRadius->isNotEmpty()) {
+                $musicians = $musiciansInRadius;
+            } else {
+                $this->searchExpanded = true;
+                $musicians = (clone $query)
+                    ->orderBy('distance')
+                    ->limit(5)
+                    ->get();
+            }
+        } else {
+            $musicians = $query->get();
+        }
 
         return view('livewire.musician-search', [
             'musicians' => $musicians,

@@ -30,21 +30,40 @@
         </div>
 
         <div class="mt-4">
-            <x-input-label for="latitude" :value="__('Latitude')" />
-            <x-text-input wire:model="latitude" id="latitude" class="block mt-1 w-full" type="text" name="latitude" />
+            <x-input-label for="base_location" :value="__('Base Location')" />
+            <x-secondary-button type="button" class="mt-1" wire:click="openLocationModal">
+                {{ __('Set Base Location on Map') }}
+            </x-secondary-button>
+            <div class="mt-2 text-sm text-gray-600">
+                Lat: <span class="font-medium">{{ $latitude ?? 'Not set' }}</span>,
+                Lng: <span class="font-medium">{{ $longitude ?? 'Not set' }}</span>
+            </div>
             @error('latitude') <span class="text-danger">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="mt-4">
-            <x-input-label for="longitude" :value="__('Longitude')" />
-            <x-text-input wire:model="longitude" id="longitude" class="block mt-1 w-full" type="text" name="longitude" />
             @error('longitude') <span class="text-danger">{{ $message }}</span> @enderror
         </div>
 
         <div class="mt-4">
-            <x-input-label for="base_price_per_hour" :value="__('Base Price Per Hour')" />
-            <x-text-input wire:model="base_price_per_hour" id="base_price_per_hour" class="block mt-1 w-full" type="number" name="base_price_per_hour" required />
+            <x-input-label for="base_price_per_hour" :value="__('Base Price Per Hour ($)')" />
+            <x-text-input wire:model="base_price_per_hour" id="base_price_per_hour" class="block mt-1 w-full" type="number" name="base_price_per_hour" required step="0.01" />
             @error('base_price_per_hour') <span class="text-danger">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="travel_radius_miles" :value="__('Included Travel Radius (Miles)')" />
+            <x-text-input wire:model="travel_radius_miles" id="travel_radius_miles" class="block mt-1 w-full" type="number" name="travel_radius_miles" step="1" />
+            @error('travel_radius_miles') <span class="text-danger">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="max_travel_distance_miles" :value="__('Max Travel Distance (Miles)')" />
+            <x-text-input wire:model="max_travel_distance_miles" id="max_travel_distance_miles" class="block mt-1 w-full" type="number" name="max_travel_distance_miles" step="1" />
+            @error('max_travel_distance_miles') <span class="text-danger">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="price_per_extra_mile" :value="__('Price Per Extra Mile ($)')" />
+            <x-text-input wire:model="price_per_extra_mile" id="price_per_extra_mile" class="block mt-1 w-full" type="number" name="price_per_extra_mile" step="0.01" />
+            @error('price_per_extra_mile') <span class="text-danger">{{ $message }}</span> @enderror
         </div>
 
         <div class="mt-4">
