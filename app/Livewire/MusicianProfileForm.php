@@ -88,6 +88,8 @@ class MusicianProfileForm extends Component
         $this->location_address = $location['address'];
         $this->location_city = $location['city'];
         $this->location_state = $location['state'];
+
+        $this->js("document.getElementById('location_address_display').innerText = '" . addslashes($this->location_address) . "'");
         $this->dispatch('closeLocationPicker');
     }
 

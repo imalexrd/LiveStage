@@ -3,7 +3,7 @@
         <!-- Profile Header -->
         <div class="relative bg-white">
             <!-- Banner Image -->
-            <div class="h-48 md:h-64 bg-cover bg-center" style="background-image: url('{{ $musician->banner_image_path ? asset('storage/' . $musician->banner_image_path) : 'https://via.placeholder.com/1500x500' }}');">
+            <div class="h-48 md:h-64 bg-cover bg-center" style="background-image: url('{{ $musician->banner_image_path ? asset('storage/' . $musician->banner_image_path) : 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500"><rect fill="#cccccc" width="100%" height="100%"/><text fill="#666666" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="40px">No Banner</text></svg>') }}');">
             </div>
 
             <!-- Profile Picture and Artist Name -->
@@ -11,7 +11,7 @@
                 <div class="-mt-12 sm:-mt-16 sm:flex sm:items-end sm:space-x-5">
                     <div class="flex">
                         <img class="h-24 w-24 rounded-full ring-4 ring-white sm:h-32 sm:w-32 object-cover"
-                             src="{{ $musician->manager->profile_picture_url ? asset('storage/' . $musician->manager->profile_picture_url) : 'https://via.placeholder.com/150' }}"
+                             src="{{ $musician->manager->profile_picture_url ? asset('storage/' . $musician->manager->profile_picture_url) : 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"><rect fill="#cccccc" width="100%" height="100%"/><text fill="#666666" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="20px">No Image</text></svg>') }}"
                              alt="{{ $musician->artist_name }}">
                     </div>
                     <div class="mt-6 sm:flex-1 sm:min-w-0 sm:flex sm:items-center sm:justify-end sm:space-x-6 sm:pb-1">

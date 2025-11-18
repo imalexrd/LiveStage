@@ -14,7 +14,7 @@
 
         <div class="mt-4">
             <x-input-label for="base_location" :value="__('Base Location')" />
-            <x-secondary-button type="button" class="mt-1" wire:click="openLocationModal">
+            <x-secondary-button type="button" class="mt-1" wire:click="openLocationModal" id="location_address_display">
                 {{ $location_address ? $location_address : __('Set Base Location on Map') }}
             </x-secondary-button>
             @error('location_address') <span class="text-danger">{{ $message }}</span> @enderror

@@ -104,7 +104,7 @@
                     @forelse($musicians as $musician)
                         <div class="bg-white rounded-xl shadow-lg overflow-hidden transform hover:scale-105 transition-transform duration-300 ease-in-out">
                             <a href="{{ route('musician.profile.show', ['uuid' => $musician->uuid]) }}">
-                                <img src="{{ $musician->banner_image_path ? asset('storage/' . $musician->banner_image_path) : 'https://via.placeholder.com/300x200' }}" alt="{{ $musician->artist_name }}" class="w-full h-48 object-cover">
+                                <img src="{{ $musician->banner_image_path ? asset('storage/' . $musician->banner_image_path) : 'data:image/svg+xml;base64,' . base64_encode('<svg xmlns="http://www.w3.org/2000/svg" width="300" height="200" viewBox="0 0 300 200"><rect fill="#cccccc" width="100%" height="100%"/><text fill="#666666" x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" font-family="monospace" font-size="20px">No Image</text></svg>') }}" alt="{{ $musician->artist_name }}" class="w-full h-48 object-cover">
                                 <div class="p-6">
                                     <h4 class="text-2xl font-bold text-gray-900 mb-2">{{ $musician->artist_name }}</h4>
                                     @if($musician->distance)
