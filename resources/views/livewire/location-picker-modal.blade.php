@@ -5,6 +5,17 @@
             map: null,
             marker: null,
             geocoder: null,
+            mapInitialized: false,
+            init() {
+                this.$watch('show', (value) => {
+                    if (value && !this.mapInitialized) {
+                        loadGoogleMaps(() => {
+                            this.initMap();
+                            this.mapInitialized = true;
+                        });
+                    }
+                });
+            },
             initMap() {
                 this.map = new google.maps.Map(document.getElementById('map'), {
                     center: { lat: -34.397, lng: 150.644 },
@@ -61,7 +72,7 @@
                 });
             }
         }"
-        x-init="initMap()"
+        x-init="init()"
         x-show="show"
         @keydown.escape.window="show = false"
         class="fixed inset-0 z-50 overflow-y-auto"
@@ -115,5 +126,27 @@
             </div>
         </div>
     </div>
-    <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places&callback=initMap" async defer></script>
+    <script>
+        function loadGoogleMaps(callback) {
+            if (typeof google !== 'undefined' && typeof google.maps !== 'undefined') {
+                callback();
+                return;
+            }
+            if (window.googleMapsLoading) {
+                window.addEventListener('google-maps-loaded', callback);
+                return;
+            }
+            window.googleMapsLoading = true;
+            const script = document.createElement('script');
+            script.src = `https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places`;
+            script.async = true;
+            script.defer = true;
+            document.head.appendChild(script);
+            script.onload = () => {
+                window.googleMapsLoading = false;
+                window.dispatchEvent(new Event('google-maps-loaded'));
+                callback();
+            };
+        }
+    </script>
 </div>
