@@ -23,6 +23,7 @@ class MusicianSearch extends Component
     public $maxPrice = 1000;
     public $genreMatch = 'any';
     public $eventTypeMatch = 'any';
+    public $searchExpanded = false;
 
     public $genres;
     public $eventTypes;
@@ -48,6 +49,7 @@ class MusicianSearch extends Component
 
     public function render()
     {
+        $this->searchExpanded = false;
         $query = MusicianProfile::query()->where('is_approved', true);
 
         if ($this->search) {
@@ -55,15 +57,6 @@ class MusicianSearch extends Component
                 $q->where('artist_name', 'like', '%' . $this->search . '%')
                   ->orWhere('bio', 'like', '%' . $this->search . '%');
             });
-        }
-
-        if ($this->latitude && $this->longitude) {
-            $query->selectRaw(
-                '*, ( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
-                [$this->latitude, $this->longitude, $this->latitude]
-            )
-            ->whereRaw('( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) < ?', [$this->latitude, $this->longitude, $this->latitude, $this->distance])
-            ->orderBy('distance');
         }
 
         if (!empty($this->selectedGenres)) {
@@ -80,7 +73,29 @@ class MusicianSearch extends Component
 
         $query->whereBetween('base_price_per_hour', [$this->minPrice, $this->maxPrice]);
 
-        $musicians = $query->get();
+        if ($this->latitude && $this->longitude) {
+            $query->selectRaw(
+                '*, ( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
+                [$this->latitude, $this->longitude, $this->latitude]
+            );
+
+            $musiciansInRadius = (clone $query)
+                ->whereRaw('( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) < ?', [$this->latitude, $this->longitude, $this->latitude, $this->distance])
+                ->orderBy('distance')
+                ->get();
+
+            if ($musiciansInRadius->isNotEmpty()) {
+                $musicians = $musiciansInRadius;
+            } else {
+                $this->searchExpanded = true;
+                $musicians = (clone $query)
+                    ->orderBy('distance')
+                    ->limit(5)
+                    ->get();
+            }
+        } else {
+            $musicians = $query->get();
+        }
 
         return view('livewire.musician-search', [
             'musicians' => $musicians,

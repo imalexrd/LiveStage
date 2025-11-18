@@ -59,4 +59,5 @@
             </div>
         </div>
     </div>
+    <livewire:location-picker-modal />
 </x-app-layout>
