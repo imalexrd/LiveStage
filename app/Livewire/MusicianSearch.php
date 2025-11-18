@@ -62,7 +62,7 @@ class MusicianSearch extends Component
                 '*, ( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',
                 [$this->latitude, $this->longitude, $this->latitude]
             )
-            ->having('distance', '<', $this->distance)
+            ->whereRaw('( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) < ?', [$this->latitude, $this->longitude, $this->latitude, $this->distance])
             ->orderBy('distance');
         }
 
