@@ -148,7 +148,7 @@
                     <x-secondary-button @click="show = false">
                         {{ __('Cancel') }}
                     </x-secondary-button>
-                    <x-primary-button class="ml-3" @click="dispatchLocation()">
+                    <x-primary-button type="button" class="ml-3" @click="dispatchLocation()">
                         {{ __('Select Location') }}
                     </x-primary-button>
                 </div>
