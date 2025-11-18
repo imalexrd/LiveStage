@@ -24,12 +24,9 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <select wire:model.live="location" id="location" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">All Cities</option>
-                            @foreach($supportedCities as $city)
-                                <option value="{{ $city }}">{{ $city }}</option>
-                            @endforeach
-                        </select>
+                        <button type="button" wire:click="$emit('openLocationPicker')" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            {{ $selectedAddress ?? 'Select Location' }}
+                        </button>
                     </div>
 
                     <!-- Genres -->
@@ -139,12 +136,9 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <select wire:model.live="location" id="location" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500">
-                            <option value="">All Cities</option>
-                            @foreach($supportedCities as $city)
-                                <option value="{{ $city }}">{{ $city }}</option>
-                            @endforeach
-                        </select>
+                        <button type="button" wire:click="$emit('openLocationPicker')" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                            {{ $selectedAddress ?? 'Select Location' }}
+                        </button>
                     </div>
 
                     <!-- Genres -->
@@ -215,4 +209,5 @@
             </div>
         </div>
     </div>
+    <livewire:location-picker-modal />
 </div>

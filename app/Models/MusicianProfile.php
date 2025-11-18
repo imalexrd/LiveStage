@@ -34,6 +34,9 @@ class MusicianProfile extends Model
         'latitude',
         'longitude',
         'is_approved',
+        'travel_radius_miles',
+        'max_travel_distance_miles',
+        'price_per_extra_mile',
     ];
 
     public function manager()

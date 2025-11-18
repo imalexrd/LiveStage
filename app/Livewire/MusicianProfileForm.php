@@ -18,6 +18,9 @@ class MusicianProfileForm extends Component
     public $base_price_per_hour;
     public $latitude;
     public $longitude;
+    public $travel_radius_miles;
+    public $max_travel_distance_miles;
+    public $price_per_extra_mile;
 
     public $genres;
     public $eventTypes;
@@ -44,6 +47,9 @@ class MusicianProfileForm extends Component
             $this->base_price_per_hour = $profile->base_price_per_hour;
             $this->latitude = $profile->latitude;
             $this->longitude = $profile->longitude;
+            $this->travel_radius_miles = $profile->travel_radius_miles;
+            $this->max_travel_distance_miles = $profile->max_travel_distance_miles;
+            $this->price_per_extra_mile = $profile->price_per_extra_mile;
             $this->selectedGenres = $profile->genres->pluck('id')->toArray();
             $this->selectedEventTypes = $profile->eventTypes->pluck('id')->toArray();
         }
@@ -59,6 +65,9 @@ class MusicianProfileForm extends Component
             'base_price_per_hour' => 'required|numeric|min:0',
             'latitude' => 'nullable|numeric',
             'longitude' => 'nullable|numeric',
+            'travel_radius_miles' => 'nullable|numeric|min:0',
+            'max_travel_distance_miles' => 'nullable|numeric|min:0',
+            'price_per_extra_mile' => 'nullable|numeric|min:0',
         ]);
 
         $profile = Auth::user()->musicianProfile()->updateOrCreate(

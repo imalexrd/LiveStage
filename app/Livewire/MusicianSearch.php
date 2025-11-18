@@ -13,7 +13,10 @@ class MusicianSearch extends Component
     public $search = '';
     public $latitude;
     public $longitude;
+    public $selectedAddress;
     public $distance = 50;
+
+    protected $listeners = ['locationSelected'];
     public $selectedGenres = [];
     public $selectedEventTypes = [];
     public $minPrice = 0;
@@ -28,6 +31,13 @@ class MusicianSearch extends Component
     {
         $this->genres = Genre::all();
         $this->eventTypes = EventType::all();
+    }
+
+    public function locationSelected($location)
+    {
+        $this->latitude = $location['latitude'];
+        $this->longitude = $location['longitude'];
+        $this->selectedAddress = $location['address'];
     }
 
     public function render()
