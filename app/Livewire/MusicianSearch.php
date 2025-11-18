@@ -7,6 +7,7 @@ use App\Models\MusicianProfile;
 use App\Models\Genre;
 use App\Models\EventType;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 
 class MusicianSearch extends Component
 {
@@ -16,7 +17,6 @@ class MusicianSearch extends Component
     public $selectedAddress;
     public $distance = 50;
 
-    protected $listeners = ['locationSelected'];
     public $selectedGenres = [];
     public $selectedEventTypes = [];
     public $minPrice = 0;
@@ -33,6 +33,7 @@ class MusicianSearch extends Component
         $this->eventTypes = EventType::all();
     }
 
+    #[On('locationSelected')]
     public function locationSelected($location)
     {
         $this->latitude = $location['latitude'];
@@ -42,7 +43,7 @@ class MusicianSearch extends Component
 
     public function openLocationModal()
     {
-        $this->emit('openLocationPicker');
+        $this->dispatch('openLocationPicker');
     }
 
     public function render()

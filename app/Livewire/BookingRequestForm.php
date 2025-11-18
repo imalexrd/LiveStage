@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\MusicianProfile;
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class BookingRequestForm extends Component
 {
@@ -16,8 +17,6 @@ class BookingRequestForm extends Component
     public $event_details;
     public $travelFee = 0;
     public $totalPrice = 0;
-
-    protected $listeners = ['locationSelected'];
 
     protected $rules = [
         'event_date' => 'required|date|after:today',
@@ -32,6 +31,7 @@ class BookingRequestForm extends Component
         $this->totalPrice = $this->musicianProfile->base_price_per_hour;
     }
 
+    #[On('locationSelected')]
     public function locationSelected($location)
     {
         $this->location_address = $location['address'];
@@ -82,7 +82,7 @@ class BookingRequestForm extends Component
 
     public function openLocationModal()
     {
-        $this->emit('openLocationPicker');
+        $this->dispatch('openLocationPicker');
     }
 
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)

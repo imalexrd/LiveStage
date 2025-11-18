@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
+use Livewire\Attributes\On;
 
 class LocationPickerModal extends Component
 {
@@ -11,8 +12,7 @@ class LocationPickerModal extends Component
     public $latitude;
     public $longitude;
 
-    protected $listeners = ['openLocationPicker'];
-
+    #[On('openLocationPicker')]
     public function openLocationPicker()
     {
         $this->show = true;
@@ -20,7 +20,7 @@ class LocationPickerModal extends Component
 
     public function selectLocation()
     {
-        $this->emit('locationSelected', [
+        $this->dispatch('locationSelected', [
             'address' => $this->address,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,

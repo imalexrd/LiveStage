@@ -83,9 +83,16 @@ class MusicianProfileForm extends Component
         return redirect()->route('musician.profile');
     }
 
+    #[On('locationSelected')]
+    public function locationSelected($location)
+    {
+        $this->latitude = $location['latitude'];
+        $this->longitude = $location['longitude'];
+    }
+
     public function openLocationModal()
     {
-        $this->emit('openLocationPicker');
+        $this->dispatch('openLocationPicker');
     }
 
     public function render()
