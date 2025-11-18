@@ -16,15 +16,23 @@
                     }
                 });
             },
-            initMap() {
-                this.map = new google.maps.Map(document.getElementById('map'), {
+            async initMap() {
+                const { Map } = await google.maps.importLibrary("maps");
+                const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
+                const { Autocomplete } = await google.maps.importLibrary("places");
+
+                this.map = new Map(document.getElementById('map'), {
                     center: { lat: -34.397, lng: 150.644 },
                     zoom: 8,
+                    mapId: 'YOUR_MAP_ID' // Replace with your Map ID
                 });
+
                 this.geocoder = new google.maps.Geocoder();
-                this.marker = new google.maps.Marker({
+
+                this.marker = new AdvancedMarkerElement({
                     map: this.map,
-                    draggable: true,
+                    position: { lat: -34.397, lng: 150.644 },
+                    gmpDraggable: true,
                 });
 
                 this.map.addListener('click', (e) => {
@@ -37,30 +45,31 @@
                 });
 
                 const input = document.getElementById('pac-input');
-                const searchBox = new google.maps.places.SearchBox(input);
-                this.map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+                const autocomplete = new Autocomplete(input, {
+                    fields: ["geometry", "name"],
+                });
 
-                searchBox.addListener('places_changed', () => {
-                    const places = searchBox.getPlaces();
-                    if (places.length == 0) {
+                autocomplete.bindTo("bounds", this.map);
+
+                autocomplete.addListener('place_changed', () => {
+                    const place = autocomplete.getPlace();
+                    if (!place.geometry || !place.geometry.location) {
                         return;
                     }
-                    const bounds = new google.maps.LatLngBounds();
-                    places.forEach((place) => {
-                        if (!place.geometry || !place.geometry.location) {
-                            return;
-                        }
-                        if (place.geometry.viewport) {
-                            bounds.union(place.geometry.viewport);
-                        } else {
-                            bounds.extend(place.geometry.location);
-                        }
-                    });
-                    this.map.fitBounds(bounds);
+
+                    if (place.geometry.viewport) {
+                        this.map.fitBounds(place.geometry.viewport);
+                    } else {
+                        this.map.setCenter(place.geometry.location);
+                        this.map.setZoom(17);
+                    }
+
+                    this.updateMarkerPosition(place.geometry.location);
+                    this.geocodePosition(place.geometry.location);
                 });
             },
             updateMarkerPosition(latLng) {
-                this.marker.setPosition(latLng);
+                this.marker.position = latLng;
             },
             geocodePosition(latLng) {
                 this.geocoder.geocode({ latLng: latLng }, (results, status) => {
@@ -138,7 +147,7 @@
             }
             window.googleMapsLoading = true;
             const script = document.createElement('script');
-            script.src = `https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places`;
+            script.src = `https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places,marker`;
             script.async = true;
             script.defer = true;
             document.head.appendChild(script);
