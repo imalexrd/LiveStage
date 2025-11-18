@@ -13,33 +13,16 @@
         </div>
 
         <div class="mt-4">
-            <x-input-label for="location_city" :value="__('City')" />
-            <select wire:model="location_city" id="location_city" class="block mt-1 w-full">
-                <option value="">Select a city</option>
-                @foreach($supportedCities as $city)
-                    <option value="{{ $city }}">{{ $city }}</option>
-                @endforeach
-            </select>
-            @error('location_city') <span class="text-danger">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="mt-4">
-            <x-input-label for="location_state" :value="__('State')" />
-            <x-text-input wire:model="location_state" id="location_state" class="block mt-1 w-full" type="text" name="location_state" required />
-            @error('location_state') <span class="text-danger">{{ $message }}</span> @enderror
-        </div>
-
-        <div class="mt-4">
             <x-input-label for="base_location" :value="__('Base Location')" />
             <x-secondary-button type="button" class="mt-1" wire:click="openLocationModal">
-                {{ __('Set Base Location on Map') }}
+                {{ $location_address ?? __('Set Base Location on Map') }}
             </x-secondary-button>
-            <div class="mt-2 text-sm text-gray-600">
-                Lat: <span class="font-medium">{{ $latitude ?? 'Not set' }}</span>,
-                Lng: <span class="font-medium">{{ $longitude ?? 'Not set' }}</span>
+            @if($location_address)
+            <div class="mt-2 text-sm text-gray-500">
+                Your current base of operations is set to: <span class="font-semibold text-gray-700">{{ $location_address }}</span>
             </div>
-            @error('latitude') <span class="text-danger">{{ $message }}</span> @enderror
-            @error('longitude') <span class="text-danger">{{ $message }}</span> @enderror
+            @endif
+            @error('location_address') <span class="text-danger">{{ $message }}</span> @enderror
         </div>
 
         <div class="mt-4">

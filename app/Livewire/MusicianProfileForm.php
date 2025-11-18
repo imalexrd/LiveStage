@@ -7,12 +7,15 @@ use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 use App\Models\Genre;
 use App\Models\EventType;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\On;
 
 class MusicianProfileForm extends Component
 {
     public $artist_name;
     public $bio;
+    public $location_address;
     public $location_city;
     public $location_state;
     public $base_price_per_hour;
@@ -27,12 +30,6 @@ class MusicianProfileForm extends Component
     public $selectedGenres = [];
     public $selectedEventTypes = [];
 
-    public $supportedCities = [
-        'New York',
-        'Los Angeles',
-        'Miami',
-    ];
-
     public function mount()
     {
         $this->genres = Genre::all();
@@ -42,6 +39,7 @@ class MusicianProfileForm extends Component
         if ($profile) {
             $this->artist_name = $profile->artist_name;
             $this->bio = $profile->bio;
+            $this->location_address = $profile->location_address;
             $this->location_city = $profile->location_city;
             $this->location_state = $profile->location_state;
             $this->base_price_per_hour = $profile->base_price_per_hour;
@@ -60,19 +58,46 @@ class MusicianProfileForm extends Component
         $validatedData = $this->validate([
             'artist_name' => 'required|string|max:255',
             'bio' => 'required|string',
-            'location_city' => ['required', Rule::in($this->supportedCities)],
-            'location_state' => 'required|string|max:255',
+            'location_address' => 'required|string|max:255',
             'base_price_per_hour' => 'required|numeric|min:0',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
             'travel_radius_miles' => 'nullable|numeric|min:0',
             'max_travel_distance_miles' => 'nullable|numeric|min:0',
             'price_per_extra_mile' => 'nullable|numeric|min:0',
         ]);
 
+        $city = null;
+        $state = null;
+
+        if ($this->latitude && $this->longitude) {
+            $apiKey = config('services.google.maps_api_key');
+            $response = Http::get("https://maps.googleapis.com/maps/api/geocode/json", [
+                'latlng' => "{$this->latitude},{$this->longitude}",
+                'key' => $apiKey,
+            ]);
+
+            if ($response->successful() && isset($response->json()['results'][0]['address_components'])) {
+                $components = $response->json()['results'][0]['address_components'];
+                foreach ($components as $component) {
+                    if (in_array('locality', $component['types'])) {
+                        $city = $component['long_name'];
+                    }
+                    if (in_array('administrative_area_level_1', $component['types'])) {
+                        $state = $component['short_name'];
+                    }
+                }
+            }
+        }
+
+        $profileData = array_merge($validatedData, [
+            'location_city' => $city,
+            'location_state' => $state,
+        ]);
+
         $profile = Auth::user()->musicianProfile()->updateOrCreate(
             ['manager_id' => Auth::id()],
-            $validatedData
+            $profileData
         );
 
         $profile->genres()->sync($this->selectedGenres);
@@ -86,6 +111,7 @@ class MusicianProfileForm extends Component
     #[On('locationSelected')]
     public function locationSelected($location)
     {
+        $this->location_address = $location['address'];
         $this->latitude = $location['latitude'];
         $this->longitude = $location['longitude'];
     }
