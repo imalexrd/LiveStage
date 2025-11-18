@@ -1,62 +1,42 @@
-# Próximo Hito: Búsqueda por Mapa Interactivo y Precios Dinámicos por Distancia
+# Próximo Hito: Corregir y Finalizar la Selección de Ubicación en el Perfil del Músico
 
 ## 1. Contexto General
 
-Para mejorar radicalmente la experiencia de usuario y la precisión en la contratación, abandonaremos la búsqueda de ubicación por texto y la reemplazaremos por una selección interactiva en un mapa. Esto permitirá a los clientes elegir una ubicación de evento con exactitud.
+Aunque la funcionalidad de selección de ubicación con mapa se ha implementado en todo el sitio, existe un bug crítico en la página de **edición del perfil del músico** (`/musician-profile`). Actualmente, cuando un manager selecciona una ubicación en el mapa, la dirección y las coordenadas no se guardan correctamente en su perfil.
 
-Adicionalmente, se introducirá un sistema de precios dinámico basado en la distancia de viaje. Los managers podrán configurar un radio de viaje incluido, una distancia máxima de viaje y una tarifa por milla extra. Esto automatizará el cálculo de los viáticos, ofreciendo transparencia tanto al cliente como al músico.
+Además, el formulario actual pide `Ciudad` y `Estado` por separado, lo cual es redundante y propenso a errores, ya que esta información puede ser extraída directamente de la selección del mapa.
 
-## 2. Tareas a Desarrollar
+El objetivo de este hito es solucionar este bug, refactorizar el formulario para que la selección en el mapa sea la única fuente de verdad para la ubicación, y asegurar que los datos se guarden y se muestren correctamente.
 
-### 2.1. Actualizaciones del Backend
+## 2. Requisitos Previos: Configuración de Google Maps
 
--   **Tarea 1: Ampliar el Perfil del Músico.**
-    -   **Detalles:** Crear una nueva migración para añadir las siguientes columnas a la tabla `musician_profiles`:
-        -   `travel_radius_miles` (DECIMAL, default 0): El radio en millas que el músico viaja sin coste adicional.
-        -   `max_travel_distance_miles` (DECIMAL, nullable): La distancia máxima que el músico está dispuesto a viajar.
-        -   `price_per_extra_mile` (DECIMAL, default 0): La tarifa a cobrar por cada milla recorrida fuera del `travel_radius_miles`.
-    -   **Acción:** Actualizar el modelo `MusicianProfile` para incluir estos campos en la propiedad `$fillable`.
+Antes de comenzar, es **crucial** que el entorno de Google Maps esté configurado correctamente. La falta de configuración causará errores en el frontend.
 
--   **Tarea 2: Implementar la Lógica de Cálculo de Tarifa por Distancia.**
-    -   **Detalles:** Modificar el componente o la lógica de negocio encargada de crear un booking. Al calcular el `total_price`, se debe:
-        1.  Obtener las coordenadas del músico y las coordenadas del evento.
-        2.  Calcular la distancia en millas (usando la fórmula Haversine).
-        3.  Si la distancia es mayor que `travel_radius_miles`, calcular las millas extra.
-        4.  Verificar que la distancia no exceda `max_travel_distance_miles`.
-        5.  Calcular la tarifa de viaje (`millas_extra * price_per_extra_mile`).
-        6.  Añadir esta tarifa al precio total del booking.
+**Acción:** Lee y sigue las instrucciones del nuevo archivo de documentación: `GOOGLE_MAPS_INTEGRATION.md`. Asegúrate de que tu archivo `.env` local contenga un `GOOGLE_MAPS_API_KEY` y un `GOOGLE_MAPS_MAP_ID` válidos.
 
-### 2.2. Mejoras en el Perfil del Manager (Frontend)
+## 3. Tareas a Desarrollar
 
--   **Tarea 1: Añadir Controles de Configuración de Viaje.**
-    -   **Detalles:** En la página de edición del perfil del músico, añadir los campos de formulario necesarios para que el manager pueda configurar:
-        -   Radio de viaje incluido (en millas).
-        -   Distancia máxima de viaje (en millas).
-        -   Precio por milla extra.
+### 3.1. Refactorizar el Componente `MusicianProfileForm`
 
-### 2.3. Mejoras en la Interfaz de Cliente (Frontend)
+-   **Tarea 1: Simplificar los Campos del Formulario.**
+    -   **Detalles:** En el componente `MusicianProfileForm` (`app/Livewire/MusicianProfileForm.php`) y su vista (`resources/views/livewire/musician-profile-form.blade.php`), elimina los campos de texto para `location_city` y `location_state`. La selección en el mapa será ahora la única forma de establecer la ubicación.
+    -   **Acción:** Modifica la vista para que, en lugar de los campos eliminados, se muestre la dirección completa obtenida del mapa (`location_address`).
 
--   **Tarea 1: Crear un Componente de Mapa Interactivo (`LocationPickerModal`).**
-    -   **Detalles:** Desarrollar un componente modal reutilizable (Livewire/Alpine) que contenga un mapa de Google Maps.
-        -   Al abrirse, debe solicitar permisos de geolocalización del navegador para centrar el mapa en la ubicación del usuario.
-        -   Debe incluir un campo de búsqueda (Google Places Autocomplete) para encontrar y navegar a direcciones específicas en el mapa.
-        -   El usuario debe poder seleccionar una ubicación (ej. soltando un pin).
-        -   El componente debe emitir la ubicación seleccionada (dirección, latitud, longitud) al componente padre.
+-   **Tarea 2: Implementar la Lógica de Guardado Correcta.**
+    -   **Detalles:** Actualmente, el método `locationSelected` en `MusicianProfileForm` actualiza las propiedades `latitude` y `longitude`, pero la dirección (`location_address`) y la ciudad/estado no se están guardando.
+    -   **Acción 1:** Modifica el método `locationSelected` para que también acepte y guarde la dirección.
+    -   **Acción 2:** En el método `save`, asegúrate de que los nuevos campos (`location_address`, `latitude`, `longitude`) se validen y se persistan correctamente en la base de datos. Extrae la ciudad y el estado de la dirección completa si es necesario para mantener la estructura de la base de datos.
 
--   **Tarea 2: Integrar el Mapa en la Búsqueda de Músicos.**
-    -   **Detalles:** Reemplazar el campo de texto de ubicación actual en la página de búsqueda por un botón "Seleccionar Ubicación en el Mapa".
-    -   Este botón abrirá el modal `LocationPickerModal`.
-    -   La ubicación seleccionada en el mapa se usará como filtro opcional para la búsqueda, actualizando los resultados en tiempo real.
+### 3.2. Asegurar la Carga de Datos Existentes
 
--   **Tarea 3: Integrar el Mapa en el Formulario de Booking.**
-    -   **Detalles:** En el proceso de booking, la selección de la ubicación del evento será **obligatoria**.
-    -   Utilizar el `LocationPickerModal` para que el cliente establezca la ubicación del evento.
-    -   Mostrar de forma clara y desglosada la tarifa de viaje calculada (si aplica) antes de que el cliente confirme la reserva.
+-   **Tarea 1: Mostrar la Ubicación Guardada.**
+    -   **Detalles:** Al cargar la página de edición del perfil, si el músico ya tiene una ubicación guardada, el botón "Set Base Location on Map" debería mostrar la dirección actual en lugar del texto predeterminado.
+    -   **Acción:** Modifica el método `mount` en `MusicianProfileForm` para cargar `location_address` y asegúrate de que se muestra correctamente en el botón de la vista.
 
-## 3. Punto de Verificación del Hito
+## 4. Punto de Verificación del Hito
 
-1.  Un manager puede configurar sus preferencias de viaje y tarifas por distancia en su perfil.
-2.  Un cliente puede seleccionar la ubicación de un evento en un mapa interactivo tanto en la página de búsqueda como en el formulario de booking.
-3.  La búsqueda de músicos se puede filtrar opcionalmente por la ubicación seleccionada en el mapa.
-4.  El precio total de un booking incluye automáticamente una tarifa de viaje si la distancia del evento excede el radio configurado por el manager.
-5.  El sistema impide o advierte si un booking excede la distancia máxima de viaje del músico.
+1.  La página de edición del perfil del músico ya no tiene campos de texto para `Ciudad` y `Estado`.
+2.  Al hacer clic en "Set Base Location on Map", el modal del mapa se abre correctamente.
+3.  Después de seleccionar una ubicación en el mapa y hacer clic en "Select Location", la dirección completa se muestra en la página de perfil.
+4.  Al guardar el perfil, la `location_address`, `latitude` y `longitude` se almacenan correctamente en la base de datos.
+5.  Al recargar la página, la dirección previamente guardada se muestra en el botón, confirmando que los datos se están cargando correctamente.
