@@ -1,50 +1,62 @@
-# Propuesta de Próximo Hito: Hito 10 - Búsqueda Avanzada por Ubicación y Distancia
+# Próximo Hito: Búsqueda por Mapa Interactivo y Precios Dinámicos por Distancia
 
 ## 1. Contexto General
 
-Para mejorar la experiencia de búsqueda y facilitar a los clientes la contratación de músicos locales, se implementará una funcionalidad de búsqueda basada en la ubicación geográfica. Los usuarios podrán buscar músicos introduciendo una dirección o utilizando su ubicación actual, y los resultados mostrarán la distancia a cada músico. Además, se añadirán filtros para acotar los resultados por distancia.
+Para mejorar radicalmente la experiencia de usuario y la precisión en la contratación, abandonaremos la búsqueda de ubicación por texto y la reemplazaremos por una selección interactiva en un mapa. Esto permitirá a los clientes elegir una ubicación de evento con exactitud.
+
+Adicionalmente, se introducirá un sistema de precios dinámico basado en la distancia de viaje. Los managers podrán configurar un radio de viaje incluido, una distancia máxima de viaje y una tarifa por milla extra. Esto automatizará el cálculo de los viáticos, ofreciendo transparencia tanto al cliente como al músico.
 
 ## 2. Tareas a Desarrollar
 
 ### 2.1. Actualizaciones del Backend
 
--   **Tarea:** Modificar el componente `MusicianSearch` de Livewire para soportar búsquedas por coordenadas GPS.
--   **Detalles:**
-    -   Añadir propiedades para `latitude`, `longitude` y `distance` (radio de búsqueda).
-    -   Implementar la lógica para calcular la distancia entre la ubicación del usuario y la de cada músico. Se puede utilizar una consulta SQL nativa (Haversine) o una librería de geolocalización si el motor de base de datos lo soporta.
-    -   Modificar la consulta principal para filtrar músicos dentro del radio de distancia especificado y ordenar los resultados por proximidad.
-    -   La `lat` y `lng` del músico ya están en la tabla `musician_profiles`.
+-   **Tarea 1: Ampliar el Perfil del Músico.**
+    -   **Detalles:** Crear una nueva migración para añadir las siguientes columnas a la tabla `musician_profiles`:
+        -   `travel_radius_miles` (DECIMAL, default 0): El radio en millas que el músico viaja sin coste adicional.
+        -   `max_travel_distance_miles` (DECIMAL, nullable): La distancia máxima que el músico está dispuesto a viajar.
+        -   `price_per_extra_mile` (DECIMAL, default 0): La tarifa a cobrar por cada milla recorrida fuera del `travel_radius_miles`.
+    -   **Acción:** Actualizar el modelo `MusicianProfile` para incluir estos campos en la propiedad `$fillable`.
 
-### 2.2. Mejoras en el Frontend
+-   **Tarea 2: Implementar la Lógica de Cálculo de Tarifa por Distancia.**
+    -   **Detalles:** Modificar el componente o la lógica de negocio encargada de crear un booking. Al calcular el `total_price`, se debe:
+        1.  Obtener las coordenadas del músico y las coordenadas del evento.
+        2.  Calcular la distancia en millas (usando la fórmula Haversine).
+        3.  Si la distancia es mayor que `travel_radius_miles`, calcular las millas extra.
+        4.  Verificar que la distancia no exceda `max_travel_distance_miles`.
+        5.  Calcular la tarifa de viaje (`millas_extra * price_per_extra_mile`).
+        6.  Añadir esta tarifa al precio total del booking.
 
--   **Tarea:** Actualizar la vista `musician-search.blade.php` para integrar la búsqueda por ubicación.
--   **Detalles:**
-    -   **Campo de Autocompletado de Google Places:** Reemplazar el campo de texto de ubicación actual por un campo de autocompletado de Google Places. Al seleccionar una dirección, se deberán enviar la latitud y longitud al backend.
-    -   **Botón "Usar mi ubicación actual":** Añadir un botón que, al ser pulsado, utilice la API de geolocalización del navegador para obtener la ubicación actual del usuario y realizar la búsqueda.
-    -   **Filtro de Distancia:** Añadir un `slider` o un campo de selección para que los usuarios puedan ajustar el radio de búsqueda (en millas o kilómetros).
-    -   **Visualización de Distancia:** En la tarjeta de cada músico en los resultados, mostrar la distancia desde la ubicación de búsqueda (ej. "a 5 millas").
+### 2.2. Mejoras en el Perfil del Manager (Frontend)
 
-### 2.3. Punto de Verificación del Hito
+-   **Tarea 1: Añadir Controles de Configuración de Viaje.**
+    -   **Detalles:** En la página de edición del perfil del músico, añadir los campos de formulario necesarios para que el manager pueda configurar:
+        -   Radio de viaje incluido (en millas).
+        -   Distancia máxima de viaje (en millas).
+        -   Precio por milla extra.
 
-El hito se considerará completado cuando se cumplan los siguientes puntos:
-1.  Los usuarios pueden introducir una dirección en un campo de autocompletado para buscar músicos.
-2.  Los usuarios pueden utilizar su ubicación actual para encontrar músicos cercanos.
-3.  Los resultados de la búsqueda muestran la distancia a cada músico.
-4.  Los usuarios pueden filtrar los resultados por un radio de distancia.
-5.  El sistema calcula correctamente la distancia y ordena los músicos por proximidad.
+### 2.3. Mejoras en la Interfaz de Cliente (Frontend)
 
-## Prompt para la siguiente iteración:
+-   **Tarea 1: Crear un Componente de Mapa Interactivo (`LocationPickerModal`).**
+    -   **Detalles:** Desarrollar un componente modal reutilizable (Livewire/Alpine) que contenga un mapa de Google Maps.
+        -   Al abrirse, debe solicitar permisos de geolocalización del navegador para centrar el mapa en la ubicación del usuario.
+        -   Debe incluir un campo de búsqueda (Google Places Autocomplete) para encontrar y navegar a direcciones específicas en el mapa.
+        -   El usuario debe poder seleccionar una ubicación (ej. soltando un pin).
+        -   El componente debe emitir la ubicación seleccionada (dirección, latitud, longitud) al componente padre.
 
-"Ahora, modifica la búsqueda de músicos para que funcione con geolocalización.
+-   **Tarea 2: Integrar el Mapa en la Búsqueda de Músicos.**
+    -   **Detalles:** Reemplazar el campo de texto de ubicación actual en la página de búsqueda por un botón "Seleccionar Ubicación en el Mapa".
+    -   Este botón abrirá el modal `LocationPickerModal`.
+    -   La ubicación seleccionada en el mapa se usará como filtro opcional para la búsqueda, actualizando los resultados en tiempo real.
 
-1.  **Componente Livewire (`MusicianSearch.php`):**
-    *   Añade propiedades públicas para `$latitude`, `$longitude` y `$distance`.
-    *   Modifica la consulta para que, si se proporcionan `$latitude` y `$longitude`, calcule la distancia de cada músico usando la fórmula Haversine y filtre los resultados según el valor de `$distance`.
-    *   Ordena los músicos por distancia.
-    *   Añade la distancia a cada músico en la colección de resultados.
+-   **Tarea 3: Integrar el Mapa en el Formulario de Booking.**
+    -   **Detalles:** En el proceso de booking, la selección de la ubicación del evento será **obligatoria**.
+    -   Utilizar el `LocationPickerModal` para que el cliente establezca la ubicación del evento.
+    -   Mostrar de forma clara y desglosada la tarifa de viaje calculada (si aplica) antes de que el cliente confirme la reserva.
 
-2.  **Vista (`musician-search.blade.php`):**
-    *   Reemplaza el input de ubicación por un componente de autocompletado de Google Places que actualice las propiedades `$latitude` y `$longitude` del componente Livewire.
-    *   Añade un `slider` para controlar la propiedad `$distance`.
-    *   Muestra la distancia en la tarjeta de cada músico.
-    *   Añade un botón para "Usar mi ubicación actual" que obtenga las coordenadas del navegador."
+## 3. Punto de Verificación del Hito
+
+1.  Un manager puede configurar sus preferencias de viaje y tarifas por distancia en su perfil.
+2.  Un cliente puede seleccionar la ubicación de un evento en un mapa interactivo tanto en la página de búsqueda como en el formulario de booking.
+3.  La búsqueda de músicos se puede filtrar opcionalmente por la ubicación seleccionada en el mapa.
+4.  El precio total de un booking incluye automáticamente una tarifa de viaje si la distancia del evento excede el radio configurado por el manager.
+5.  El sistema impide o advierte si un booking excede la distancia máxima de viaje del músico.
