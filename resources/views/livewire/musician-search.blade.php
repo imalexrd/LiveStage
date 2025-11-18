@@ -1,4 +1,4 @@
-<div x-data="{ filtersOpen: false }" x-init="getCurrentLocation()">
+<div x-data="{ filtersOpen: false }">
     <!-- Page Content -->
     <div class="relative">
         <!-- Mobile Filter Button -->
@@ -274,6 +274,7 @@
     }
 
     document.addEventListener('livewire:load', function () {
+        getCurrentLocation();
         document.getElementById('use-location-btn').addEventListener('click', getCurrentLocation);
         document.getElementById('use-location-btn-mobile').addEventListener('click', getCurrentLocation);
     });
