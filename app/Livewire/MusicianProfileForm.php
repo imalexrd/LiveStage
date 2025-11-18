@@ -88,6 +88,7 @@ class MusicianProfileForm extends Component
         $this->location_address = $location['address'];
         $this->location_city = $location['city'];
         $this->location_state = $location['state'];
+        $this->dispatch('closeLocationPicker');
     }
 
     public function openLocationModal()

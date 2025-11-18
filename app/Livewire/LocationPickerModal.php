@@ -18,6 +18,11 @@ class LocationPickerModal extends Component
     public function selectLocation($location)
     {
         $this->dispatch('locationSelected', $location);
+    }
+
+    #[On('closeLocationPicker')]
+    public function closeModal()
+    {
         $this->show = false;
     }
 
