@@ -17,14 +17,13 @@
                 });
             },
             async initMap() {
-                const { Map } = await google.maps.importLibrary("maps");
-                const { AdvancedMarkerElement } = await google.maps.importLibrary("marker");
-                const { Autocomplete } = await google.maps.importLibrary("places");
+                const { Map } = await google.maps.importLibrary('maps');
+                const { AdvancedMarkerElement } = await google.maps.importLibrary('marker');
+                const { Autocomplete } = await google.maps.importLibrary('places');
 
                 this.map = new Map(document.getElementById('map'), {
                     center: { lat: -34.397, lng: 150.644 },
                     zoom: 8,
-                    mapId: 'YOUR_MAP_ID' // Replace with your Map ID
                 });
 
                 this.geocoder = new google.maps.Geocoder();
@@ -46,10 +45,10 @@
 
                 const input = document.getElementById('pac-input');
                 const autocomplete = new Autocomplete(input, {
-                    fields: ["geometry", "name"],
+                    fields: ['geometry', 'name'],
                 });
 
-                autocomplete.bindTo("bounds", this.map);
+                autocomplete.bindTo('bounds', this.map);
 
                 autocomplete.addListener('place_changed', () => {
                     const place = autocomplete.getPlace();
