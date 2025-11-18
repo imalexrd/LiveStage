@@ -55,7 +55,7 @@ class MusicianProfileForm extends Component
 
     public function save(MusicianProfileService $profileService)
     {
-        $validatedData = MusicianProfileData::from($this);
+        $validatedData = MusicianProfileData::from($this->all());
 
         $profileService->updateProfile(
             Auth::user(),
