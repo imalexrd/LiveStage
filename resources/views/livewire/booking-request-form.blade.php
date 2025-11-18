@@ -14,7 +14,7 @@
 
         <div class="mb-4">
             <label for="event_location" class="block text-sm font-medium text-gray-700">Event Location</label>
-            <button type="button" wire:click="$emit('openLocationPicker')" class="w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+            <button type="button" wire:click="openLocationModal" class="w-full bg-white border border-gray-300 rounded-md shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                 {{ $location_address ?? 'Select Location' }}
             </button>
             @error('location_address') <span class="text-sm text-red-500">{{ $message }}</span> @enderror

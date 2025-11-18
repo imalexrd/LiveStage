@@ -80,6 +80,11 @@ class BookingRequestForm extends Component
         $this->reset();
     }
 
+    public function openLocationModal()
+    {
+        $this->emit('openLocationPicker');
+    }
+
     private function calculateDistance($lat1, $lon1, $lat2, $lon2)
     {
         $theta = $lon1 - $lon2;

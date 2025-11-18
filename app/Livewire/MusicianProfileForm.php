@@ -83,6 +83,11 @@ class MusicianProfileForm extends Component
         return redirect()->route('musician.profile');
     }
 
+    public function openLocationModal()
+    {
+        $this->emit('openLocationPicker');
+    }
+
     public function render()
     {
         return view('livewire.musician-profile-form');

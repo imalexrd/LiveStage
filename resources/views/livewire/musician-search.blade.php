@@ -24,7 +24,7 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <button type="button" wire:click="$emit('openLocationPicker')" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <button type="button" wire:click="openLocationModal" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             {{ $selectedAddress ?? 'Select Location' }}
                         </button>
                     </div>
@@ -136,7 +136,7 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <button type="button" wire:click="$emit('openLocationPicker')" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                        <button type="button" wire:click="openLocationModal" class="w-full bg-white border border-gray-300 rounded-lg shadow-sm py-2 px-4 text-left hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
                             {{ $selectedAddress ?? 'Select Location' }}
                         </button>
                     </div>

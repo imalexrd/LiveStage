@@ -40,6 +40,11 @@ class MusicianSearch extends Component
         $this->selectedAddress = $location['address'];
     }
 
+    public function openLocationModal()
+    {
+        $this->emit('openLocationPicker');
+    }
+
     public function render()
     {
         $query = MusicianProfile::query()->where('is_approved', true);

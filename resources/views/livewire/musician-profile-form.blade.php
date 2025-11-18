@@ -31,7 +31,7 @@
 
         <div class="mt-4">
             <x-input-label for="base_location" :value="__('Base Location')" />
-            <x-secondary-button type="button" class="mt-1" wire:click="$emit('openLocationPicker')">
+            <x-secondary-button type="button" class="mt-1" wire:click="openLocationModal">
                 {{ __('Set Base Location on Map') }}
             </x-secondary-button>
             <div class="mt-2 text-sm text-gray-600">
