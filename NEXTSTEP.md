@@ -1,42 +1,77 @@
-# Próximo Hito: Corregir y Finalizar la Selección de Ubicación en el Perfil del Músico
+# Plan de Refactorización: Centralización de la Lógica de Negocio
 
-## 1. Contexto General
+## Objetivo Principal
 
-Aunque la funcionalidad de selección de ubicación con mapa se ha implementado en todo el sitio, existe un bug crítico en la página de **edición del perfil del músico** (`/musician-profile`). Actualmente, cuando un manager selecciona una ubicación en el mapa, la dirección y las coordenadas no se guardan correctamente en su perfil.
+El objetivo de esta refactorización es extraer la lógica de negocio actualmente dispersa en los componentes de Livewire y los controladores de Laravel, y centralizarla en una capa de servicios dedicada. Esto desacoplará la lógica de la implementación de la interfaz de usuario (UI), lo que permitirá:
 
-Además, el formulario actual pide `Ciudad` y `Estado` por separado, lo cual es redundante y propenso a errores, ya que esta información puede ser extraída directamente de la selección del mapa.
+1.  **Reutilización de Código:** La misma lógica de negocio podrá ser utilizada por controladores web, componentes de Livewire y nuevos controladores de API.
+2.  **Desarrollo en Paralelo:** Facilitará la creación de una API para una futura aplicación móvil sin duplicar código.
+3.  **Mantenibilidad:** Hará que el código sea más fácil de entender, probar y mantener a largo plazo.
+4.  **Testing Simplificado:** Permitirá escribir pruebas unitarias para la lógica de negocio de forma aislada.
 
-El objetivo de este hito es solucionar este bug, refactorizar el formulario para que la selección en el mapa sea la única fuente de verdad para la ubicación, y asegurar que los datos se guarden y se muestren correctamente.
+## Arquitectura Propuesta
 
-## 2. Requisitos Previos: Configuración de Google Maps
+Implementaremos un patrón de **Capa de Servicios** (Service Layer).
 
-Antes de comenzar, es **crucial** que el entorno de Google Maps esté configurado correctamente. La falta de configuración causará errores en el frontend.
+1.  **Capa de Servicios (`app/Services`):**
+    *   Contendrá toda la lógica de negocio principal (crear reservas, buscar músicos, gestionar perfiles, etc.).
+    *   Cada servicio será una clase PHP simple (POPO - Plain Old PHP Object) que puede ser inyectada donde se necesite.
+    *   Ejemplos: `BookingService`, `MusicianProfileService`.
 
-**Acción:** Lee y sigue las instrucciones del nuevo archivo de documentación: `GOOGLE_MAPS_INTEGRATION.md`. Asegúrate de que tu archivo `.env` local contenga un `GOOGLE_MAPS_API_KEY` y un `GOOGLE_MAPS_MAP_ID` válidos.
+2.  **Controladores (`app/Http/Controllers`):**
+    *   Se convertirán en "controladores delgados" (thin controllers).
+    *   Su única responsabilidad será:
+        1.  Recibir y validar las peticiones HTTP.
+        2.  Llamar a los métodos correspondientes en la capa de servicios.
+        3.  Devolver una respuesta (una vista, una redirección o JSON para la API).
 
-## 3. Tareas a Desarrollar
+3.  **Componentes de Livewire (`app/Livewire`):**
+    *   También se volverán "delgados".
+    *   Su responsabilidad se centrará en gestionar el estado de la UI y la interacción del usuario.
+    *   Llamarán a la capa de servicios para ejecutar acciones de negocio, en lugar de contener la lógica directamente.
 
-### 3.1. Refactorizar el Componente `MusicianProfileForm`
+4.  **(Opcional pero recomendado) Data Transfer Objects (DTOs):**
+    *   Para estandarizar los datos que fluyen entre las capas (peticiones -> servicios -> modelos), se recomienda usar DTOs.
+    *   Estos son objetos simples que definen la estructura de los datos. El paquete `spatie/laravel-data` es una excelente opción para esto.
 
--   **Tarea 1: Simplificar los Campos del Formulario.**
-    -   **Detalles:** En el componente `MusicianProfileForm` (`app/Livewire/MusicianProfileForm.php`) y su vista (`resources/views/livewire/musician-profile-form.blade.php`), elimina los campos de texto para `location_city` y `location_state`. La selección en el mapa será ahora la única forma de establecer la ubicación.
-    -   **Acción:** Modifica la vista para que, en lugar de los campos eliminados, se muestre la dirección completa obtenida del mapa (`location_address`).
+---
 
--   **Tarea 2: Implementar la Lógica de Guardado Correcta.**
-    -   **Detalles:** Actualmente, el método `locationSelected` en `MusicianProfileForm` actualiza las propiedades `latitude` y `longitude`, pero la dirección (`location_address`) y la ciudad/estado no se están guardando.
-    -   **Acción 1:** Modifica el método `locationSelected` para que también acepte y guarde la dirección.
-    -   **Acción 2:** En el método `save`, asegúrate de que los nuevos campos (`location_address`, `latitude`, `longitude`) se validen y se persistan correctamente en la base de datos. Extrae la ciudad y el estado de la dirección completa si es necesario para mantener la estructura de la base de datos.
+## Prompt para el Agente de IA: Instrucciones de Ejecución
 
-### 3.2. Asegurar la Carga de Datos Existentes
+"Hola. Tu tarea es refactorizar esta aplicación Laravel para centralizar la lógica de negocio en una capa de servicios. Sigue el plan detallado en este documento (`REFACTOR.md`) y ejecuta las fases en orden. No avances a la siguiente fase hasta completar la anterior y asegurarte de que la funcionalidad existente no se ha roto.
 
--   **Tarea 1: Mostrar la Ubicación Guardada.**
-    -   **Detalles:** Al cargar la página de edición del perfil, si el músico ya tiene una ubicación guardada, el botón "Set Base Location on Map" debería mostrar la dirección actual en lugar del texto predeterminado.
-    -   **Acción:** Modifica el método `mount` en `MusicianProfileForm` para cargar `location_address` y asegúrate de que se muestra correctamente en el botón de la vista.
+**Fase 1: Crear la Capa de Servicios y Refactorizar los Bookings**
 
-## 4. Punto de Verificación del Hito
+1.  Crea un nuevo directorio: `app/Services`.
+2.  Dentro de `app/Services`, crea un nuevo archivo llamado `BookingService.php`.
+3.  Analiza el componente `app/Livewire/BookingRequestForm.php`. Identifica toda la lógica relacionada con la creación y validación de una reserva (`Booking`).
+4.  Mueve esa lógica al `BookingService`. Crea un método público como `createBooking(User $client, MusicianProfile $profile, array $data): Booking`. Este método debe encargarse de crear y guardar la reserva en la base de datos.
+5.  Refactoriza el componente `app/Livewire/BookingRequestForm.php` para que inyecte y utilice `BookingService` para crear la reserva. El componente solo debe encargarse de recoger los datos del formulario y llamar al servicio.
+6.  Verifica que el formulario de solicitud de reserva sigue funcionando correctamente después de los cambios.
 
-1.  La página de edición del perfil del músico ya no tiene campos de texto para `Ciudad` y `Estado`.
-2.  Al hacer clic en "Set Base Location on Map", el modal del mapa se abre correctamente.
-3.  Después de seleccionar una ubicación en el mapa y hacer clic en "Select Location", la dirección completa se muestra en la página de perfil.
-4.  Al guardar el perfil, la `location_address`, `latitude` y `longitude` se almacenan correctamente en la base de datos.
-5.  Al recargar la página, la dirección previamente guardada se muestra en el botón, confirmando que los datos se están cargando correctamente.
+**Fase 2: Refactorizar los Perfiles de Músico**
+
+1.  Crea un nuevo servicio: `app/Services/MusicianProfileService.php`.
+2.  Analiza los componentes `app/Livewire/MusicianProfileForm.php` y `app/Livewire/MusicianSearch.php`.
+3.  Mueve la lógica para crear/actualizar un perfil de músico desde `MusicianProfileForm` al `MusicianProfileService`. Crea un método como `updateProfile(User $user, array $data): MusicianProfile`.
+4.  Mueve la lógica de búsqueda y filtrado de músicos desde `MusicianSearch` al `MusicianProfileService`. Crea un método como `search(array $filters)`.
+5.  Refactoriza ambos componentes de Livewire para que utilicen el `MusicianProfileService`.
+6.  Asegúrate de que la edición de perfiles y la búsqueda de músicos sigan funcionando como antes.
+
+**Fase 3: Introducir Controladores de API**
+
+1.  Crea un nuevo controlador de API: `app/Http/Controllers/Api/V1/MusicianProfileController.php`.
+2.  En `routes/api.php`, define una ruta de tipo `GET` para `/api/v1/musicians` que apunte al método `index` del nuevo controlador.
+3.  Implementa el método `index` en `MusicianProfileController`. Este método debe:
+    *   Inyectar el `MusicianProfileService`.
+    *   Usar el método `search()` del servicio (creado en la Fase 2) para obtener los perfiles.
+    *   Devolver los resultados como una respuesta JSON. Puedes usar `Resources` de Laravel para formatear la salida.
+4.  Verifica que puedes obtener una lista de músicos en formato JSON accediendo a `http://<tu-dominio>/api/v1/musicians`.
+
+**Fase 4 (Opcional Avanzado): Implementar DTOs con `spatie/laravel-data`**
+
+1.  Si el paquete no está instalado, ejecútalo: `composer require spatie/laravel-data`.
+2.  Crea un DTO para los datos de actualización del perfil del músico: `app/Data/MusicianProfileData.php`. Este DTO debe definir las propiedades que se pueden actualizar (ej: `nickname`, `bio`, `city`, etc.).
+3.  Modifica el método `updateProfile` en `MusicianProfileService` para que acepte el DTO en lugar de un array: `updateProfile(User $user, MusicianProfileData $data): MusicianProfile`.
+4.  Actualiza el componente `MusicianProfileForm` para que cree una instancia de `MusicianProfileData` a partir de los datos del formulario y la pase al servicio.
+5.  Verifica que la actualización del perfil sigue funcionando correctamente. Esto estandariza el flujo de datos y lo hace más robusto."
