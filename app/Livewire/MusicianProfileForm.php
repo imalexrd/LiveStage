@@ -15,6 +15,7 @@ class MusicianProfileForm extends Component
     public $bio;
     public $location_city;
     public $location_state;
+    public $location_address;
     public $base_price_per_hour;
     public $latitude;
     public $longitude;
@@ -27,12 +28,6 @@ class MusicianProfileForm extends Component
     public $selectedGenres = [];
     public $selectedEventTypes = [];
 
-    public $supportedCities = [
-        'New York',
-        'Los Angeles',
-        'Miami',
-    ];
-
     public function mount()
     {
         $this->genres = Genre::all();
@@ -44,6 +39,7 @@ class MusicianProfileForm extends Component
             $this->bio = $profile->bio;
             $this->location_city = $profile->location_city;
             $this->location_state = $profile->location_state;
+            $this->location_address = $profile->location_address;
             $this->base_price_per_hour = $profile->base_price_per_hour;
             $this->latitude = $profile->latitude;
             $this->longitude = $profile->longitude;
@@ -60,11 +56,12 @@ class MusicianProfileForm extends Component
         $validatedData = $this->validate([
             'artist_name' => 'required|string|max:255',
             'bio' => 'required|string',
-            'location_city' => ['required', Rule::in($this->supportedCities)],
+            'location_city' => 'required|string|max:255',
             'location_state' => 'required|string|max:255',
+            'location_address' => 'required|string|max:255',
             'base_price_per_hour' => 'required|numeric|min:0',
-            'latitude' => 'nullable|numeric',
-            'longitude' => 'nullable|numeric',
+            'latitude' => 'required|numeric',
+            'longitude' => 'required|numeric',
             'travel_radius_miles' => 'nullable|numeric|min:0',
             'max_travel_distance_miles' => 'nullable|numeric|min:0',
             'price_per_extra_mile' => 'nullable|numeric|min:0',
@@ -88,6 +85,9 @@ class MusicianProfileForm extends Component
     {
         $this->latitude = $location['latitude'];
         $this->longitude = $location['longitude'];
+        $this->location_address = $location['address'];
+        $this->location_city = $location['city'];
+        $this->location_state = $location['state'];
     }
 
     public function openLocationModal()

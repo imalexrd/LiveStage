@@ -11,6 +11,8 @@ class LocationPickerModal extends Component
     public $address;
     public $latitude;
     public $longitude;
+    public $city;
+    public $state;
 
     #[On('openLocationPicker')]
     public function openLocationPicker()
@@ -24,6 +26,8 @@ class LocationPickerModal extends Component
             'address' => $this->address,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
+            'city' => $this->city,
+            'state' => $this->state,
         ]);
         $this->show = false;
     }

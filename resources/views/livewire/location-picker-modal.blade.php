@@ -75,6 +75,19 @@
                         $wire.set('address', results[0].formatted_address);
                         $wire.set('latitude', results[0].geometry.location.lat());
                         $wire.set('longitude', results[0].geometry.location.lng());
+
+                        let city = '';
+                        let state = '';
+                        for (const component of results[0].address_components) {
+                            if (component.types.includes('locality')) {
+                                city = component.long_name;
+                            }
+                            if (component.types.includes('administrative_area_level_1')) {
+                                state = component.short_name;
+                            }
+                        }
+                        $wire.set('city', city);
+                        $wire.set('state', state);
                     }
                 });
             }
