@@ -24,8 +24,16 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <input id="location-input" type="text" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter a location">
-                        <button type="button" id="use-location-btn" class="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Use my current location</button>
+                        @if(config('services.google.maps_api_key'))
+                            <input id="location-input" type="text" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter a location">
+                            <button type="button" id="use-location-btn" class="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Use my current location</button>
+                        @else
+                            <div class="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50" role="alert">
+                                <span class="font-medium">Location search is disabled.</span> Please configure the Google Maps API key to enable this feature.
+                            </div>
+                            <input id="location-input" type="text" class="w-full border-gray-300 rounded-lg shadow-sm bg-gray-100" placeholder="Enter a location" disabled>
+                            <button type="button" id="use-location-btn" class="mt-2 w-full bg-blue-300 text-white py-2 rounded-lg cursor-not-allowed" disabled>Use my current location</button>
+                        @endif
                     </div>
 
                     <!-- Distance -->
@@ -150,8 +158,16 @@
                     <!-- Location -->
                     <div class="mb-6">
                         <label for="location-mobile" class="block text-sm font-semibold text-gray-700 mb-2">Location</label>
-                        <input id="location-input-mobile" type="text" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter a location">
-                        <button type="button" id="use-location-btn-mobile" class="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Use my current location</button>
+                        @if(config('services.google.maps_api_key'))
+                            <input id="location-input-mobile" type="text" class="w-full border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500" placeholder="Enter a location">
+                            <button type="button" id="use-location-btn-mobile" class="mt-2 w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300">Use my current location</button>
+                        @else
+                             <div class="p-4 mb-4 text-sm text-yellow-800 rounded-lg bg-yellow-50" role="alert">
+                                <span class="font-medium">Location search is disabled.</span> Please configure the Google Maps API key to enable this feature.
+                            </div>
+                            <input id="location-input-mobile" type="text" class="w-full border-gray-300 rounded-lg shadow-sm bg-gray-100" placeholder="Enter a location" disabled>
+                            <button type="button" id="use-location-btn-mobile" class="mt-2 w-full bg-blue-300 text-white py-2 rounded-lg cursor-not-allowed" disabled>Use my current location</button>
+                        @endif
                     </div>
 
                     <!-- Distance -->
@@ -262,6 +278,22 @@
         });
     }
 
+    function handleLocationError(error) {
+        let message = "An unknown error occurred.";
+        switch (error.code) {
+            case error.PERMISSION_DENIED:
+                message = "You denied the request for Geolocation. Please enable location services in your browser settings to use this feature.";
+                break;
+            case error.POSITION_UNAVAILABLE:
+                message = "Location information is unavailable.";
+                break;
+            case error.TIMEOUT:
+                message = "The request to get user location timed out.";
+                break;
+        }
+        alert(message);
+    }
+
     function getCurrentLocation() {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition((position) => {
@@ -269,15 +301,21 @@
                 const lng = position.coords.longitude;
                 @this.set('latitude', lat);
                 @this.set('longitude', lng);
-            });
+            }, handleLocationError);
+        } else {
+            alert("Geolocation is not supported by this browser.");
         }
     }
 
     document.addEventListener('livewire:load', function () {
-        getCurrentLocation();
-        document.getElementById('use-location-btn').addEventListener('click', getCurrentLocation);
-        document.getElementById('use-location-btn-mobile').addEventListener('click', getCurrentLocation);
+        @if(config('services.google.maps_api_key'))
+            getCurrentLocation();
+            document.getElementById('use-location-btn').addEventListener('click', getCurrentLocation);
+            document.getElementById('use-location-btn-mobile').addEventListener('click', getCurrentLocation);
+        @endif
     });
 </script>
+@if(config('services.google.maps_api_key'))
 <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key') }}&libraries=places&callback=initMap" async defer></script>
+@endif
 @endpush
