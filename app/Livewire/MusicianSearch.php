@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Data\MusicianSearchFilterData;
 use App\Services\MusicianProfileService;
 use Livewire\Component;
 use App\Models\Genre;
@@ -48,7 +49,7 @@ class MusicianSearch extends Component
 
     public function render(MusicianProfileService $profileService)
     {
-        $filters = [
+        $filters = MusicianSearchFilterData::from([
             'search' => $this->search,
             'latitude' => $this->latitude,
             'longitude' => $this->longitude,
@@ -59,7 +60,7 @@ class MusicianSearch extends Component
             'maxPrice' => $this->maxPrice,
             'genreMatch' => $this->genreMatch,
             'eventTypeMatch' => $this->eventTypeMatch,
-        ];
+        ]);
 
         $result = $profileService->search($filters);
 
