@@ -1,48 +1,37 @@
-# Próximo Objetivo: Paridad de Funcionalidades - API y Web
+# Próximo Objetivo: Mejorar la Experiencia de Booking y Precios Dinámicos
 
 ## Prompt para el Agente de IA
 
-"Hola. Tu tarea es continuar la refactorización de esta aplicación Laravel para que la API RESTful alcance la paridad de funcionalidades con la interfaz web de Livewire. La Fase 3 (Endpoint de Búsqueda) ya ha sido completada. Ahora debes enfocarte en la Fase 4, que consiste en implementar la gestión completa de perfiles de músicos a través de la API.
+"Hola. Tu próxima tarea es mejorar la robustez del formulario de booking y expandir el sistema de precios dinámicos antes de pasar a la integración de Stripe.
 
-**Fase 4: Implementar CRUD de Perfiles de Músico en la API**
+**Fase 1: Mejorar la Experiencia de Usuario (UX) del Formulario de Booking**
 
-El objetivo es replicar toda la funcionalidad que actualmente existe en el formulario de perfil de músico de Livewire, pero a través de endpoints de API.
+1.  **Corregir el Flujo de Actualización de Precios:**
+    *   **Problema:** Actualmente, el precio no se recalcula si el usuario selecciona una ubicación *antes* de seleccionar una fecha.
+    *   **Solución:** Modifica el componente Livewire `BookingRequestForm` para que el precio se actualice correctamente sin importar el orden en que se llenen los campos. Una posible solución es forzar al usuario a seleccionar una fecha primero, deshabilitando el selector de ubicación hasta que la fecha esté presente.
+    *   **Prueba:** Añade un test de Livewire que simule el llenado del formulario en un orden "incorrecto" y verifique que el precio final es el correcto.
 
-1.  **Obtener un Perfil Específico (Read):**
-    *   Crea un método `show` en `MusicianProfileController`.
-    *   Define una ruta `GET /api/v1/musicians/{profile}` en `routes/api.php`.
-    *   El método debe recibir un `MusicianProfile`, inyectado a través de *route model binding*.
-    *   Devuelve los datos del perfil utilizando `MusicianProfileResource`.
-    *   **Prueba:** Escribe un test que verifique que al hacer un GET a `/api/v1/musicians/{id}` se obtiene el perfil correcto con la estructura JSON esperada.
+**Fase 2: Implementar Precios Dinámicos Avanzados**
 
-2.  **Crear un Nuevo Perfil (Create):**
-    *   Crea un método `store` en `MusicianProfileController`.
-    *   Define una ruta `POST /api/v1/musicians` protegida con `auth:sanctum`. Solo los usuarios con rol `manager` pueden crear perfiles.
-    *   El método debe aceptar un `MusicianProfileData` DTO para la validación.
-    *   Utiliza el `MusicianProfileService` para crear el perfil asociado al usuario autenticado.
-    *   Devuelve el perfil recién creado con un código de estado `201` (Created).
-    *   **Prueba:** Escribe un test que simule una petición POST por un usuario `manager` autenticado, enviando datos válidos, y verifique que el perfil se crea en la base de datos y se devuelve la respuesta correcta.
+1.  **Configuración de Antelación Mínima por Músico:**
+    *   **Requerimiento:** Los managers deben poder configurar con cuántos días de antelación mínimo se puede reservar a un músico (ej. 1 día, 7 días).
+    *   **Implementación:**
+        *   Añade una columna `minimum_booking_notice_days` (integer, default 1) a la tabla `musician_profiles`.
+        *   Actualiza el `MusicianProfileForm` para que los managers puedan editar este valor.
+        *   Modifica la validación en el `BookingService` para que `createBooking` falle si la fecha del evento no cumple con la antelación mínima requerida.
 
-3.  **Actualizar un Perfil Existente (Update):**
-    *   Crea un método `update` en `MusicianProfileController`.
-    *   Define una ruta `PUT /api/v1/musicians/{profile}` protegida con `auth:sanctum`.
-    *   Implementa una `Policy` para asegurar que solo el `manager` propietario del perfil pueda actualizarlo.
-    *   El método debe aceptar un `MusicianProfileData` DTO.
-    *   Utiliza el `MusicianProfileService` para actualizar el perfil.
-    *   Devuelve el perfil actualizado.
-    *   **Prueba:** Escribe un test que simule una petición PUT por el `manager` propietario, verifique que los datos se actualizan y que un usuario no autorizado recibe un error `403` (Forbidden).
+2.  **Tarifa de Urgencia para Bookings de Último Minuto:**
+    *   **Requerimiento:** La plataforma debe poder cobrar una tarifa extra para bookings realizados con poca antelación (ej. para el día siguiente).
+    *   **Implementación:**
+        *   Añade una configuración en `config/fees.php` para la "tarifa de urgencia" (ej. `urgency_fee_percentage` = 10, `urgency_threshold_days` = 1).
+        *   En el `BookingService`, dentro de `calculateTotalPrice`, añade la tarifa de urgencia al `totalPrice` si la fecha del evento está dentro del umbral definido.
+        *   Asegúrate de que la tarifa de urgencia se muestre en el desglose de precios.
 
-4.  **Eliminar un Perfil (Delete):**
-    *   Crea un método `destroy` en `MusicianProfileController`.
-    *   Define una ruta `DELETE /api/v1/musicians/{profile}` protegida con `auth:sanctum`.
-    *   Utiliza la misma `Policy` del paso anterior para la autorización.
-    *   Elimina el perfil de la base de datos.
-    *   Devuelve una respuesta vacía con un código de estado `204` (No Content).
-    *   **Prueba:** Escribe un test que verifique que el propietario puede eliminar su perfil y que la entrada desaparece de la base de datos.
-
-**Guía para Pruebas de API:**
-
--   **Autenticación:** Para probar los endpoints protegidos, primero debes autenticar a un usuario en tu test y luego usar el método `actingAs($user, 'sanctum')` para realizar las peticiones.
--   **Headers:** Asegúrate de incluir el header `Accept: application/json` en tus peticiones de prueba para recibir respuestas en formato JSON.
--   **Validación:** Escribe tests que verifiquen los fallos de validación. Por ejemplo, envía una petición `POST` sin un campo requerido y asegúrate de recibir un código de estado `422` (Unprocessable Entity) con los errores correspondientes.
+3.  **Comisión de la Aplicación Variable (App Fee):**
+    *   **Requerimiento:** Prepara el sistema para una futura integración con Stripe Connect, donde la comisión de la plataforma (`app_fee`) pueda ser variable.
+    *   **Implementación:**
+        *   En el `BookingService`, la lógica de `calculateTotalPrice` debe devolver también un valor `app_fee`.
+        *   Por ahora, la `app_fee` puede ser un porcentaje fijo del `basePrice` y la `weekendSurcharge` (ej. 15%).
+        *   A futuro, este cálculo podrá incluir factores como el nivel del músico, si es un booking de último minuto, etc.
+        *   **Nota:** No es necesario mostrar la `app_fee` al cliente en el desglose de precios, pero sí debe ser parte del objeto de precio devuelto por el servicio.
 "
