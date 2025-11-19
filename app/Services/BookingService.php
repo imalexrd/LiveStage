@@ -49,19 +49,7 @@ class BookingService
             ]);
         }
 
-        $travelFee = 0;
-        if ($distance > $musicianProfile->travel_radius_miles) {
-            $extraMiles = $distance - $musicianProfile->travel_radius_miles;
-            $travelFee = $extraMiles * $musicianProfile->price_per_extra_mile;
-        }
-
-        $basePrice = $musicianProfile->base_price_per_hour;
-        $eventDate = Carbon::parse($validatedData['event_date']);
-        if ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) {
-            $basePrice *= 1.15;
-        }
-
-        $totalPrice = $basePrice + $travelFee;
+        $totalPrice = $this->calculateTotalPrice($musicianProfile, $validatedData);
 
         return $client->bookings()->create([
             'musician_profile_id' => $musicianProfile->id,
@@ -71,7 +59,7 @@ class BookingService
             'location_longitude' => $validatedData['location_longitude'],
             'event_details' => $validatedData['event_details'],
             'status' => 'pending',
-            'total_price' => round($totalPrice, 2),
+            'total_price' => $totalPrice,
         ]);
     }
 
@@ -92,5 +80,33 @@ class BookingService
         $dist = rad2deg($dist);
         $miles = $dist * 60 * 1.1515;
         return (float) $miles;
+    }
+
+    public function calculateTotalPrice(MusicianProfile $musicianProfile, array $data): float
+    {
+        $distance = $this->calculateDistance(
+            $musicianProfile->latitude,
+            $musicianProfile->longitude,
+            $data['location_latitude'],
+            $data['location_longitude']
+        );
+
+        $travelFee = 0;
+        if ($distance > $musicianProfile->travel_radius_miles) {
+            $extraMiles = $distance - $musicianProfile->travel_radius_miles;
+            $travelFee = $extraMiles * $musicianProfile->price_per_extra_mile;
+        }
+
+        $basePrice = $musicianProfile->base_price_per_hour;
+        if (isset($data['event_date'])) {
+            $eventDate = Carbon::parse($data['event_date']);
+            if ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) {
+                $basePrice *= 1.15;
+            }
+        }
+
+        $totalPrice = $basePrice + $travelFee;
+
+        return round($totalPrice, 2);
     }
 }

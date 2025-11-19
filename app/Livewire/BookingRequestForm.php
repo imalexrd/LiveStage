@@ -79,6 +79,25 @@ class BookingRequestForm extends Component
         $this->dispatch('openLocationPicker');
     }
 
+    public function updated($propertyName)
+    {
+        if (in_array($propertyName, ['event_date', 'location_latitude', 'location_longitude'])) {
+            $this->calculatePrice();
+        }
+    }
+
+    public function calculatePrice()
+    {
+        if ($this->event_date && $this->location_latitude && $this->location_longitude) {
+            $bookingService = app(BookingService::class);
+            $this->totalPrice = $bookingService->calculateTotalPrice($this->musicianProfile, [
+                'event_date' => $this->event_date,
+                'location_latitude' => $this->location_latitude,
+                'location_longitude' => $this->location_longitude,
+            ]);
+        }
+    }
+
     public function render()
     {
         return view('livewire.booking-request-form');

@@ -27,16 +27,8 @@
         </div>
 
         <div class="p-4 mt-4 bg-gray-100 rounded-lg">
-            <h3 class="text-lg font-medium text-gray-900">Price Breakdown</h3>
+            <h3 class="text-lg font-medium text-gray-900">Estimated Price</h3>
             <div class="mt-2 text-sm text-gray-600">
-                <div class="flex justify-between">
-                    <span>Base Price (1 hour):</span>
-                    <span>${{ number_format($this->musicianProfile->base_price_per_hour, 2) }}</span>
-                </div>
-                <div class="flex justify-between">
-                    <span>Travel Fee:</span>
-                    <span>${{ number_format($this->travelFee, 2) }}</span>
-                </div>
                 <div class="flex justify-between mt-2 pt-2 border-t border-gray-300 font-bold">
                     <span>Total:</span>
                     <span>${{ number_format($this->totalPrice, 2) }}</span>
