@@ -10,7 +10,7 @@ class MusicianProfileData extends Data
     public function __construct(
         public string $artist_name,
         public string $bio,
-        public string $location_address,
+        public ?string $location_address,
         public float $base_price_per_hour,
         public float $latitude,
         public float $longitude,
@@ -26,7 +26,7 @@ class MusicianProfileData extends Data
         return [
             'artist_name' => ['required', 'string', 'max:255'],
             'bio' => ['required', 'string'],
-            'location_address' => ['required', 'string', 'max:255'],
+            'location_address' => ['nullable', 'string', 'max:255'],
             'base_price_per_hour' => ['required', 'numeric', 'min:0'],
             'latitude' => ['required', 'numeric'],
             'longitude' => ['required', 'numeric'],
