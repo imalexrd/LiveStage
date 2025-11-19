@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Data\MusicianProfileData;
+use App\Data\MusicianSearchFilterData;
 use App\Models\User;
 use App\Models\MusicianProfile;
 use Illuminate\Support\Facades\Http;
@@ -50,37 +51,37 @@ class MusicianProfileService
         return $profile;
     }
 
-    public function search(array $filters): array
+    public function search(MusicianSearchFilterData $filters): array
     {
         $query = MusicianProfile::query()->where('is_approved', true);
 
-        if (!empty($filters['search'])) {
+        if ($filters->search) {
             $query->where(function ($q) use ($filters) {
-                $q->where('artist_name', 'like', '%' . $filters['search'] . '%')
-                  ->orWhere('bio', 'like', '%' . $filters['search'] . '%');
+                $q->where('artist_name', 'like', '%' . $filters->search . '%')
+                  ->orWhere('bio', 'like', '%' . $filters->search . '%');
             });
         }
 
-        if (!empty($filters['selectedGenres'])) {
+        if ($filters->selectedGenres) {
             $query->whereHas('genres', function ($q) use ($filters) {
-                $q->whereIn('genres.id', $filters['selectedGenres']);
-            }, ($filters['genreMatch'] ?? 'any') === 'all' ? '=' : '>=', 1);
+                $q->whereIn('genres.id', $filters->selectedGenres);
+            }, ($filters->genreMatch ?? 'any') === 'all' ? '=' : '>=', 1);
         }
 
-        if (!empty($filters['selectedEventTypes'])) {
+        if ($filters->selectedEventTypes) {
             $query->whereHas('eventTypes', function ($q) use ($filters) {
-                $q->whereIn('event_types.id', $filters['selectedEventTypes']);
-            }, ($filters['eventTypeMatch'] ?? 'any') === 'all' ? '=' : '>=', 1);
+                $q->whereIn('event_types.id', $filters->selectedEventTypes);
+            }, ($filters->eventTypeMatch ?? 'any') === 'all' ? '=' : '>=', 1);
         }
 
-        $query->whereBetween('base_price_per_hour', [$filters['minPrice'] ?? 0, $filters['maxPrice'] ?? 1000]);
+        $query->whereBetween('base_price_per_hour', [$filters->minPrice ?? 0, $filters->maxPrice ?? 1000]);
 
         $searchExpanded = false;
 
-        if (!empty($filters['latitude']) && !empty($filters['longitude'])) {
-            $lat = $filters['latitude'];
-            $lon = $filters['longitude'];
-            $distance = $filters['distance'] ?? 50;
+        if ($filters->latitude && $filters->longitude) {
+            $lat = $filters->latitude;
+            $lon = $filters->longitude;
+            $distance = $filters->distance ?? 50;
 
             $query->selectRaw(
                 '*, ( 3959 * acos( cos( radians(?) ) * cos( radians( latitude ) ) * cos( radians( longitude ) - radians(?) ) + sin( radians(?) ) * sin( radians( latitude ) ) ) ) AS distance',

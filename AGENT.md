@@ -102,3 +102,19 @@ php artisan migrate:fresh --seed
     -   Hay un test inestable, `AuthenticationTest`, que puede fallar al no encontrar texto que sí está presente en la respuesta. Este parece ser un problema del entorno de pruebas.
 
 -   **Sistema de Archivos:** Las imágenes y otros medios se suben a `storage/app/public`. Para que sean accesibles desde la web, se debe crear un enlace simbólico con `php artisan storage:link`. En las vistas de Blade, siempre se debe usar el helper `asset('storage/...')` para generar las URLs correctas.
+
+---
+
+## 5. Pruebas de API
+
+La aplicación expone endpoints RESTful para interactuar con los datos.
+
+-   **Endpoint de Búsqueda de Músicos:** Para probar el endpoint de búsqueda, puedes usar `curl` o cualquier cliente API. Asegúrate de que tu servidor local (`php artisan serve`) esté en ejecución.
+
+    ```bash
+    # Ejemplo: Obtener todos los músicos
+    curl -X GET "http://127.0.0.1:8000/api/v1/musicians"
+
+    # Ejemplo: Buscar músicos por nombre
+    curl -X GET "http://127.0.0.1:8000/api/v1/musicians?search=Rock"
+    ```

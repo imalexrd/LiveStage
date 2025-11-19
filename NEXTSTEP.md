@@ -1,22 +1,48 @@
-# Próximo Objetivo: Implementar Controladores de API
+# Próximo Objetivo: Paridad de Funcionalidades - API y Web
 
 ## Prompt para el Agente de IA
 
-"Hola. Tu tarea es continuar la refactorización de esta aplicación Laravel para exponer la lógica de negocio a través de una API RESTful. La Fase 2 (Refactorización de Perfiles de Músico a la Capa de Servicios) ya ha sido completada. Ahora debes enfocarte en la Fase 3.
+"Hola. Tu tarea es continuar la refactorización de esta aplicación Laravel para que la API RESTful alcance la paridad de funcionalidades con la interfaz web de Livewire. La Fase 3 (Endpoint de Búsqueda) ya ha sido completada. Ahora debes enfocarte en la Fase 4, que consiste en implementar la gestión completa de perfiles de músicos a través de la API.
 
-**Fase 3: Introducir Controladores de API**
+**Fase 4: Implementar CRUD de Perfiles de Músico en la API**
 
-1.  Crea un nuevo controlador de API: `app/Http/Controllers/Api/V1/MusicianProfileController.php`.
-2.  En `routes/api.php`, define una ruta de tipo `GET` para `/api/v1/musicians` que apunte al método `index` del nuevo controlador.
-3.  Implementa el método `index` en `MusicianProfileController`. Este método debe:
-    *   Inyectar el `MusicianProfileService`.
-    *   Usar el método `search()` del servicio (ya creado en la Fase 2) para obtener los perfiles. Puedes pasarle los parámetros de la petición (`$request->all()`) como filtros.
-    *   Devolver los resultados como una respuesta JSON. Puedes usar `Resources` de Laravel para formatear la salida si lo consideras necesario.
-4.  Verifica que puedes obtener una lista de músicos en formato JSON accediendo a la ruta `/api/v1/musicians` a través de un cliente API o un test.
+El objetivo es replicar toda la funcionalidad que actualmente existe en el formulario de perfil de músico de Livewire, pero a través de endpoints de API.
 
-**Fase 4 (Opcional Avanzado): Implementar DTOs para la API**
+1.  **Obtener un Perfil Específico (Read):**
+    *   Crea un método `show` en `MusicianProfileController`.
+    *   Define una ruta `GET /api/v1/musicians/{profile}` en `routes/api.php`.
+    *   El método debe recibir un `MusicianProfile`, inyectado a través de *route model binding*.
+    *   Devuelve los datos del perfil utilizando `MusicianProfileResource`.
+    *   **Prueba:** Escribe un test que verifique que al hacer un GET a `/api/v1/musicians/{id}` se obtiene el perfil correcto con la estructura JSON esperada.
 
-1.  Crea un DTO para los filtros de búsqueda de la API: `app/Data/MusicianSearchFilterData.php`. Este DTO debe definir las propiedades que se pueden usar para filtrar (ej: `search`, `latitude`, `longitude`, `minPrice`, etc.).
-2.  Modifica el método `index` en `MusicianProfileController` para que acepte el DTO en lugar de un array: `index(MusicianSearchFilterData $filters)`.
-3.  Actualiza el método `search` en `MusicianProfileService` para que también acepte el `MusicianSearchFilterData` DTO.
-4.  Verifica que la búsqueda a través de la API sigue funcionando correctamente. Esto estandariza la validación y el flujo de datos desde la petición hasta el servicio."
+2.  **Crear un Nuevo Perfil (Create):**
+    *   Crea un método `store` en `MusicianProfileController`.
+    *   Define una ruta `POST /api/v1/musicians` protegida con `auth:sanctum`. Solo los usuarios con rol `manager` pueden crear perfiles.
+    *   El método debe aceptar un `MusicianProfileData` DTO para la validación.
+    *   Utiliza el `MusicianProfileService` para crear el perfil asociado al usuario autenticado.
+    *   Devuelve el perfil recién creado con un código de estado `201` (Created).
+    *   **Prueba:** Escribe un test que simule una petición POST por un usuario `manager` autenticado, enviando datos válidos, y verifique que el perfil se crea en la base de datos y se devuelve la respuesta correcta.
+
+3.  **Actualizar un Perfil Existente (Update):**
+    *   Crea un método `update` en `MusicianProfileController`.
+    *   Define una ruta `PUT /api/v1/musicians/{profile}` protegida con `auth:sanctum`.
+    *   Implementa una `Policy` para asegurar que solo el `manager` propietario del perfil pueda actualizarlo.
+    *   El método debe aceptar un `MusicianProfileData` DTO.
+    *   Utiliza el `MusicianProfileService` para actualizar el perfil.
+    *   Devuelve el perfil actualizado.
+    *   **Prueba:** Escribe un test que simule una petición PUT por el `manager` propietario, verifique que los datos se actualizan y que un usuario no autorizado recibe un error `403` (Forbidden).
+
+4.  **Eliminar un Perfil (Delete):**
+    *   Crea un método `destroy` en `MusicianProfileController`.
+    *   Define una ruta `DELETE /api/v1/musicians/{profile}` protegida con `auth:sanctum`.
+    *   Utiliza la misma `Policy` del paso anterior para la autorización.
+    *   Elimina el perfil de la base de datos.
+    *   Devuelve una respuesta vacía con un código de estado `204` (No Content).
+    *   **Prueba:** Escribe un test que verifique que el propietario puede eliminar su perfil y que la entrada desaparece de la base de datos.
+
+**Guía para Pruebas de API:**
+
+-   **Autenticación:** Para probar los endpoints protegidos, primero debes autenticar a un usuario en tu test y luego usar el método `actingAs($user, 'sanctum')` para realizar las peticiones.
+-   **Headers:** Asegúrate de incluir el header `Accept: application/json` en tus peticiones de prueba para recibir respuestas en formato JSON.
+-   **Validación:** Escribe tests que verifiquen los fallos de validación. Por ejemplo, envía una petición `POST` sin un campo requerido y asegúrate de recibir un código de estado `422` (Unprocessable Entity) con los errores correspondientes.
+"

@@ -3,6 +3,7 @@
 namespace Tests\Unit\Services;
 
 use App\Data\MusicianProfileData;
+use App\Data\MusicianSearchFilterData;
 use App\Models\EventType;
 use App\Models\Genre;
 use App\Models\MusicianProfile;
@@ -78,7 +79,7 @@ class MusicianProfileServiceTest extends TestCase
         MusicianProfile::factory()->create(['artist_name' => 'The Rockers', 'is_approved' => true]);
         MusicianProfile::factory()->create(['artist_name' => 'The Jazz Cats', 'is_approved' => true]);
 
-        $filters = ['search' => 'Rock'];
+        $filters = MusicianSearchFilterData::from(['search' => 'Rock']);
         $result = $this->service->search($filters);
 
         $this->assertCount(1, $result['musicians']);
