@@ -19,6 +19,8 @@ class MusicianProfileData extends Data
         public ?float $travel_radius_miles,
         public ?float $max_travel_distance_miles,
         public ?float $price_per_extra_mile,
+        public ?array $selectedGenres,
+        public ?array $selectedEventTypes,
     ) {}
 
     public static function rules(): array
@@ -33,6 +35,8 @@ class MusicianProfileData extends Data
             'travel_radius_miles' => ['nullable', 'numeric', 'min:0'],
             'max_travel_distance_miles' => ['nullable', 'numeric', 'min:0'],
             'price_per_extra_mile' => ['nullable', 'numeric', 'min:0'],
+            'selectedGenres' => ['nullable', 'array'],
+            'selectedEventTypes' => ['nullable', 'array'],
         ];
     }
 }

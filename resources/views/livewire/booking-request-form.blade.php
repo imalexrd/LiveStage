@@ -31,12 +31,20 @@
             <div class="mt-2 text-sm text-gray-600">
                 <div class="flex justify-between">
                     <span>Base Price (1 hour):</span>
-                    <span>${{ number_format($this->musicianProfile->base_price_per_hour, 2) }}</span>
+                    <span>${{ number_format($this->basePrice, 2) }}</span>
                 </div>
-                <div class="flex justify-between">
-                    <span>Travel Fee:</span>
-                    <span>${{ number_format($this->travelFee, 2) }}</span>
-                </div>
+                @if ($weekendSurcharge > 0)
+                    <div class="flex justify-between">
+                        <span>Weekend Surcharge:</span>
+                        <span>${{ number_format($this->weekendSurcharge, 2) }}</span>
+                    </div>
+                @endif
+                @if ($travelFee > 0)
+                    <div class="flex justify-between">
+                        <span>Travel Fee:</span>
+                        <span>${{ number_format($this->travelFee, 2) }}</span>
+                    </div>
+                @endif
                 <div class="flex justify-between mt-2 pt-2 border-t border-gray-300 font-bold">
                     <span>Total:</span>
                     <span>${{ number_format($this->totalPrice, 2) }}</span>

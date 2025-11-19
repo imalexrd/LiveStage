@@ -54,7 +54,7 @@ class BookingService
             $travelFee = $extraMiles * $musicianProfile->price_per_extra_mile;
         }
 
-        $totalPrice = $musicianProfile->base_price_per_hour + $travelFee;
+        $priceBreakdown = $this->calculateTotalPrice($musicianProfile, $validatedData);
 
         return $client->bookings()->create([
             'musician_profile_id' => $musicianProfile->id,
@@ -64,7 +64,7 @@ class BookingService
             'location_longitude' => $validatedData['location_longitude'],
             'event_details' => $validatedData['event_details'],
             'status' => 'pending',
-            'total_price' => $totalPrice,
+            'total_price' => $priceBreakdown['totalPrice'],
         ]);
     }
 
@@ -85,5 +85,39 @@ class BookingService
         $dist = rad2deg($dist);
         $miles = $dist * 60 * 1.1515;
         return (float) $miles;
+    }
+
+    public function calculateTotalPrice(MusicianProfile $musicianProfile, array $data): array
+    {
+        $distance = $this->calculateDistance(
+            $musicianProfile->latitude,
+            $musicianProfile->longitude,
+            $data['location_latitude'],
+            $data['location_longitude']
+        );
+
+        $travelFee = 0;
+        if ($distance > $musicianProfile->travel_radius_miles) {
+            $extraMiles = $distance - $musicianProfile->travel_radius_miles;
+            $travelFee = $extraMiles * $musicianProfile->price_per_extra_mile;
+        }
+
+        $basePrice = $musicianProfile->base_price_per_hour;
+        $weekendSurcharge = 0;
+        if (isset($data['event_date'])) {
+            $eventDate = \Carbon\Carbon::parse($data['event_date']);
+            if ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) {
+                $weekendSurcharge = $basePrice * 0.15;
+            }
+        }
+
+        $totalPrice = $basePrice + $weekendSurcharge + $travelFee;
+
+        return [
+            'basePrice' => round($basePrice, 2),
+            'weekendSurcharge' => round($weekendSurcharge, 2),
+            'travelFee' => round($travelFee, 2),
+            'totalPrice' => round($totalPrice, 2),
+        ];
     }
 }
