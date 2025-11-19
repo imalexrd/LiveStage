@@ -49,7 +49,7 @@ class MusicianProfileController extends Controller
         $data = MusicianProfileData::from($request->all());
 
         $updatedProfile = $this->musicianProfileService->updateProfile(
-            $request->user(),
+            $profile->manager,
             $data,
             $data->selectedGenres ?? [],
             $data->selectedEventTypes ?? []

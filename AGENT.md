@@ -4,6 +4,90 @@ Este documento proporciona toda la información necesaria para configurar, desar
 
 ---
 
+## 5. API Endpoints
+
+A continuación se detallan los endpoints de la API, junto con ejemplos de cómo interactuar con ellos.
+
+### 5.1. Obtener el Usuario Autenticado
+
+*   **Endpoint:** `GET /api/user`
+*   **Descripción:** Devuelve los datos del usuario autenticado.
+*   **Comando `curl`:**
+    ```bash
+    curl -X GET "http://127.0.0.1:8000/api/user" \
+         -H "Authorization: Bearer <YOUR_TOKEN>" \
+         -H "Accept: application/json"
+    ```
+
+### 5.2. Listar Músicos
+
+*   **Endpoint:** `GET /api/v1/musicians`
+*   **Descripción:** Devuelve una lista paginada de perfiles de músicos.
+*   **Comando `curl`:**
+    ```bash
+    curl -X GET "http://127.0.0.1:8000/api/v1/musicians" \
+         -H "Accept: application/json"
+    ```
+
+### 5.3. Obtener un Perfil de Músico
+
+*   **Endpoint:** `GET /api/v1/musicians/{profile}`
+*   **Descripción:** Devuelve los datos de un perfil de músico específico.
+*   **Comando `curl`:**
+    ```bash
+    curl -X GET "http://127.0.0.1:8000/api/v1/musicians/1" \
+         -H "Accept: application/json"
+    ```
+
+### 5.4. Crear un Perfil de Músico
+
+*   **Endpoint:** `POST /api/v1/musicians`
+*   **Descripción:** Crea un nuevo perfil de músico. Requiere autenticación como 'manager'.
+*   **Comando `curl`:**
+    ```bash
+    curl -X POST "http://127.0.0.1:8000/api/v1/musicians" \
+         -H "Authorization: Bearer <YOUR_TOKEN>" \
+         -H "Accept: application/json" \
+         -d '{
+               "artist_name": "The API Band",
+               "bio": "A band created via the API.",
+               "base_price_per_hour": 200,
+               "latitude": 34.0522,
+               "longitude": -118.2437
+             }'
+    ```
+
+### 5.5. Actualizar un Perfil de Músico
+
+*   **Endpoint:** `PUT /api/v1/musicians/{profile}`
+*   **Descripción:** Actualiza un perfil de músico existente. Requiere autenticación como el 'manager' propietario.
+*   **Comando `curl`:**
+    ```bash
+    curl -X PUT "http://127.0.0.1:8000/api/v1/musicians/1" \
+         -H "Authorization: Bearer <YOUR_TOKEN>" \
+         -H "Accept: application/json" \
+         -d '{
+               "artist_name": "The Updated API Band",
+               "bio": "An updated bio.",
+               "base_price_per_hour": 250,
+               "latitude": 34.0522,
+               "longitude": -118.2437
+             }'
+    ```
+
+### 5.6. Eliminar un Perfil de Músico
+
+*   **Endpoint:** `DELETE /api/v1/musicians/{profile}`
+*   **Descripción:** Elimina un perfil de músico. Requiere autenticación como el 'manager' propietario.
+*   **Comando `curl`:**
+    ```bash
+    curl -X DELETE "http://127.0.0.1:8000/api/v1/musicians/1" \
+         -H "Authorization: Bearer <YOUR_TOKEN>" \
+         -H "Accept: application/json"
+    ```
+
+---
+
 ## 1. Arquitectura y Patrones de Diseño
 
 El backend sigue un patrón de **Capa de Servicios (Service Layer)**.

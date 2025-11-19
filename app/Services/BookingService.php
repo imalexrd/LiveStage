@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Booking;
 use App\Models\MusicianProfile;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
@@ -54,7 +55,13 @@ class BookingService
             $travelFee = $extraMiles * $musicianProfile->price_per_extra_mile;
         }
 
-        $totalPrice = $musicianProfile->base_price_per_hour + $travelFee;
+        $basePrice = $musicianProfile->base_price_per_hour;
+        $eventDate = Carbon::parse($validatedData['event_date']);
+        if ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) {
+            $basePrice *= 1.15;
+        }
+
+        $totalPrice = $basePrice + $travelFee;
 
         return $client->bookings()->create([
             'musician_profile_id' => $musicianProfile->id,
@@ -64,7 +71,7 @@ class BookingService
             'location_longitude' => $validatedData['location_longitude'],
             'event_details' => $validatedData['event_details'],
             'status' => 'pending',
-            'total_price' => $totalPrice,
+            'total_price' => round($totalPrice, 2),
         ]);
     }
 

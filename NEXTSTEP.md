@@ -1,48 +1,53 @@
-# Próximo Objetivo: Paridad de Funcionalidades - API y Web
+# Próximo Objetivo: Integración de Pagos con Stripe Connect
 
 ## Prompt para el Agente de IA
 
-"Hola. Tu tarea es continuar la refactorización de esta aplicación Laravel para que la API RESTful alcance la paridad de funcionalidades con la interfaz web de Livewire. La Fase 3 (Endpoint de Búsqueda) ya ha sido completada. Ahora debes enfocarte en la Fase 4, que consiste en implementar la gestión completa de perfiles de músicos a través de la API.
+"Hola. Tu próxima tarea es implementar el sistema de cobro del servicio, el corazón de la aplicación. Deberás integrar Stripe Connect para gestionar los flujos financieros en nuestro modelo de marketplace, donde el cliente paga directamente al afiliado y la plataforma retiene una comisión.
 
-**Fase 4: Implementar CRUD de Perfiles de Músico en la API**
+La arquitectura se basará en **Cuentas Conectadas Standard (Standard Connected Accounts)** y **Cargos Directos (Direct Charges)**. Esto transfiere la responsabilidad de disputas y fraudes al afiliado, mientras la plataforma monetiza a través de comisiones de aplicación (`application_fee`).
 
-El objetivo es replicar toda la funcionalidad que actualmente existe en el formulario de perfil de músico de Livewire, pero a través de endpoints de API.
+Sigue estas fases para construir la integración:
 
-1.  **Obtener un Perfil Específico (Read):**
-    *   Crea un método `show` en `MusicianProfileController`.
-    *   Define una ruta `GET /api/v1/musicians/{profile}` en `routes/api.php`.
-    *   El método debe recibir un `MusicianProfile`, inyectado a través de *route model binding*.
-    *   Devuelve los datos del perfil utilizando `MusicianProfileResource`.
-    *   **Prueba:** Escribe un test que verifique que al hacer un GET a `/api/v1/musicians/{id}` se obtiene el perfil correcto con la estructura JSON esperada.
+**Fase 1: Configuración Fundamental y Onboarding de Afiliados**
 
-2.  **Crear un Nuevo Perfil (Create):**
-    *   Crea un método `store` en `MusicianProfileController`.
-    *   Define una ruta `POST /api/v1/musicians` protegida con `auth:sanctum`. Solo los usuarios con rol `manager` pueden crear perfiles.
-    *   El método debe aceptar un `MusicianProfileData` DTO para la validación.
-    *   Utiliza el `MusicianProfileService` para crear el perfil asociado al usuario autenticado.
-    *   Devuelve el perfil recién creado con un código de estado `201` (Created).
-    *   **Prueba:** Escribe un test que simule una petición POST por un usuario `manager` autenticado, enviando datos válidos, y verifique que el perfil se crea en la base de datos y se devuelve la respuesta correcta.
+1.  **Instalación y Configuración:**
+    *   Instala el SDK nativo de Stripe (`stripe/stripe-php`).
+    *   Añade las claves de API de Stripe (pública, secreta y del webhook de Connect) al archivo de configuración `config/services.php` y al `.env`.
+    *   Crea una migración para añadir la columna `stripe_account_id` (string, nullable, indexado) a la tabla `users` para almacenar el ID de la cuenta conectada del afiliado.
 
-3.  **Actualizar un Perfil Existente (Update):**
-    *   Crea un método `update` en `MusicianProfileController`.
-    *   Define una ruta `PUT /api/v1/musicians/{profile}` protegida con `auth:sanctum`.
-    *   Implementa una `Policy` para asegurar que solo el `manager` propietario del perfil pueda actualizarlo.
-    *   El método debe aceptar un `MusicianProfileData` DTO.
-    *   Utiliza el `MusicianProfileService` para actualizar el perfil.
-    *   Devuelve el perfil actualizado.
-    *   **Prueba:** Escribe un test que simule una petición PUT por el `manager` propietario, verifique que los datos se actualizan y que un usuario no autorizado recibe un error `403` (Forbidden).
+2.  **Implementar el Flujo de Onboarding:**
+    *   Crea un `StripeConnectController` con las siguientes rutas y métodos:
+        *   `POST /stripe/connect`: Para iniciar el proceso. Este método creará una Cuenta Conectada Standard en Stripe y guardará el `stripe_account_id` en la base de datos del usuario.
+        *   `POST /stripe/onboarding-link`: Generará un `AccountLink` de Stripe para que el usuario complete su información.
+        *   `GET /stripe/return`: La `return_url` a la que el usuario es redirigido. Este método debe verificar el estado de la cuenta (`charges_enabled`).
+        *   `GET /stripe/refresh`: La `refresh_url` para manejar enlaces expirados, generando uno nuevo.
 
-4.  **Eliminar un Perfil (Delete):**
-    *   Crea un método `destroy` en `MusicianProfileController`.
-    *   Define una ruta `DELETE /api/v1/musicians/{profile}` protegida con `auth:sanctum`.
-    *   Utiliza la misma `Policy` del paso anterior para la autorización.
-    *   Elimina el perfil de la base de datos.
-    *   Devuelve una respuesta vacía con un código de estado `204` (No Content).
-    *   **Prueba:** Escribe un test que verifique que el propietario puede eliminar su perfil y que la entrada desaparece de la base de datos.
+**Fase 2: Procesamiento de Pagos (Cargos Directos)**
 
-**Guía para Pruebas de API:**
+1.  **Crear la Lógica de Checkout:**
+    *   Crea un `CheckoutController` que orqueste la creación de una sesión de Stripe Checkout.
+    *   La sesión debe configurarse con `mode: 'payment'`.
+    *   Dentro de `payment_intent_data`, establece el `application_fee_amount` para cobrar la comisión de la plataforma.
+    *   Al crear la sesión, es **crítico** pasar el `Stripe-Account` header con el `stripe_account_id` del afiliado para asegurar que es un Cargo Directo.
 
--   **Autenticación:** Para probar los endpoints protegidos, primero debes autenticar a un usuario en tu test y luego usar el método `actingAs($user, 'sanctum')` para realizar las peticiones.
--   **Headers:** Asegúrate de incluir el header `Accept: application/json` en tus peticiones de prueba para recibir respuestas en formato JSON.
--   **Validación:** Escribe tests que verifiquen los fallos de validación. Por ejemplo, envía una petición `POST` sin un campo requerido y asegúrate de recibir un código de estado `422` (Unprocessable Entity) con los errores correspondientes.
+2.  **Validación de Seguridad:**
+    *   Antes de crear la sesión de Checkout, implementa una validación para asegurar que la cuenta del afiliado (`stripe_account_id`) existe y tiene `charges_enabled` a `true`.
+
+**Fase 3: Sincronización de Estado con Webhooks de Connect**
+
+1.  **Crear el Controlador de Webhooks:**
+    *   Crea un `StripeConnectWebhookController` para manejar los eventos provenientes de las cuentas conectadas.
+    *   Configura una ruta `POST /stripe/connect-webhook` y asegúrate de añadirla a las excepciones de CSRF.
+    *   Implementa la verificación de la firma del webhook de Connect usando el secreto correspondiente (`connect_webhook_secret`).
+
+2.  **Manejar Eventos Críticos:**
+    *   **`checkout.session.completed`**: Este evento es la fuente de verdad para confirmar un pago. Al recibirlo, actualiza el estado de la reserva o pedido a "pagado". Utiliza colas de Laravel para procesar esta lógica en segundo plano.
+    *   **`account.updated`**: Escucha este evento para sincronizar el estado de la cuenta conectada (ej. si `charges_enabled` o `payouts_enabled` cambian) con tu base de datos local.
+
+**Fase 4: Gestión Post-Pago (Reembolsos)**
+
+1.  **Implementar la Lógica de Reembolsos:**
+    *   Crea un endpoint de API (`POST /api/v1/bookings/{booking}/refund`) para que un usuario autorizado pueda solicitar un reembolso.
+    *   Al procesar el reembolso a través de la API de Stripe, incluye el parámetro `refund_application_fee: true` para devolver la comisión de la plataforma al afiliado.
+    *   Asegúrate de pasar el `Stripe-Account` header para que el reembolso se procese en la cuenta correcta.
 "
