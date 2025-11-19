@@ -39,6 +39,7 @@ class BookingRequestForm extends Component
         // will now happen in the BookingService on submit.
         // We can optionally provide a real-time estimate here if needed,
         // but for now, we'll just update the address.
+        $this->calculatePrice();
     }
 
     public function submit(BookingService $bookingService)

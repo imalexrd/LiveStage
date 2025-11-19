@@ -52,9 +52,12 @@ class BookingServiceTest extends TestCase
 
         $booking = $this->bookingService->createBooking($client, $musicianProfile, $bookingData);
 
+        $eventDate = \Carbon\Carbon::parse($bookingData['event_date']);
+        $expectedPrice = ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) ? 150 * 1.15 : 150;
+
         $this->assertDatabaseHas('bookings', [
             'id' => $booking->id,
-            'total_price' => 150, // Base price, no travel
+            'total_price' => round($expectedPrice, 2),
         ]);
     }
 
@@ -80,11 +83,14 @@ class BookingServiceTest extends TestCase
 
         $booking = $this->bookingService->createBooking($client, $musicianProfile, $bookingData);
 
-        // Distance is ~81 miles. Extra miles = 81 - 50 = 31. Fee = 31 * 2 = 62. Total = 200 + 62 = 262
+        $eventDate = \Carbon\Carbon::parse($bookingData['event_date']);
+        $basePrice = ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) ? 200 * 1.15 : 200;
+        $expectedPrice = $basePrice + (81 - 50) * 2;
+
         $this->assertDatabaseHas('bookings', [
             'id' => $booking->id,
         ]);
-        $this->assertEqualsWithDelta(262, $booking->total_price, 1.0); // Allow a tolerance of 1.0
+        $this->assertEqualsWithDelta($expectedPrice, $booking->total_price, 1.0); // Allow a tolerance of 1.0
     }
 
     /** @test */
