@@ -11,6 +11,14 @@ use Illuminate\Database\Eloquent\Collection;
 
 class MusicianProfileService
 {
+    public function create(MusicianProfileData $data, User $user): MusicianProfile
+    {
+        $profileData = $data->toArray();
+        $profileData['manager_id'] = $user->id;
+
+        return MusicianProfile::create($profileData);
+    }
+
     public function updateProfile(User $user, MusicianProfileData $data, array $selectedGenres, array $selectedEventTypes): MusicianProfile
     {
         $city = null;
