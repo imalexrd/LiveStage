@@ -17,11 +17,14 @@ class BookingRequestForm extends Component
     public $location_latitude;
     public $location_longitude;
     public $event_details;
+    public $basePrice = 0;
+    public $weekendSurcharge = 0;
     public $travelFee = 0;
     public $totalPrice = 0;
 
     public function mount()
     {
+        $this->basePrice = $this->musicianProfile->base_price_per_hour;
         $this->totalPrice = $this->musicianProfile->base_price_per_hour;
     }
 
@@ -91,11 +94,16 @@ class BookingRequestForm extends Component
     {
         if ($this->event_date && $this->location_latitude && $this->location_longitude) {
             $bookingService = app(BookingService::class);
-            $this->totalPrice = $bookingService->calculateTotalPrice($this->musicianProfile, [
+            $priceBreakdown = $bookingService->calculateTotalPrice($this->musicianProfile, [
                 'event_date' => $this->event_date,
                 'location_latitude' => $this->location_latitude,
                 'location_longitude' => $this->location_longitude,
             ]);
+
+            $this->basePrice = $priceBreakdown['basePrice'];
+            $this->weekendSurcharge = $priceBreakdown['weekendSurcharge'];
+            $this->travelFee = $priceBreakdown['travelFee'];
+            $this->totalPrice = $priceBreakdown['totalPrice'];
         }
     }
 

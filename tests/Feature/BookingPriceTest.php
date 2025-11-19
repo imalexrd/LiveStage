@@ -44,9 +44,10 @@ class BookingPriceTest extends TestCase
         ];
 
         $bookingService = new BookingService();
-        $booking = $bookingService->createBooking($client, $musician, $bookingData);
+        $priceBreakdown = $bookingService->calculateTotalPrice($musician, $bookingData);
 
-        $this->assertEquals(100, $booking->total_price);
+        $this->assertEquals(100, $priceBreakdown['totalPrice']);
+        $this->assertEquals(0, $priceBreakdown['weekendSurcharge']);
     }
 
     public function test_it_applies_a_surcharge_for_a_weekend_booking()
@@ -74,9 +75,10 @@ class BookingPriceTest extends TestCase
         ];
 
         $bookingService = new BookingService();
-        $booking = $bookingService->createBooking($client, $musician, $bookingData);
+        $priceBreakdown = $bookingService->calculateTotalPrice($musician, $bookingData);
 
-        $this->assertEquals(115, $booking->total_price);
+        $this->assertEquals(115, $priceBreakdown['totalPrice']);
+        $this->assertEquals(15, $priceBreakdown['weekendSurcharge']);
     }
 
     public function test_it_applies_a_surcharge_for_a_friday_booking()
@@ -104,8 +106,9 @@ class BookingPriceTest extends TestCase
         ];
 
         $bookingService = new BookingService();
-        $booking = $bookingService->createBooking($client, $musician, $bookingData);
+        $priceBreakdown = $bookingService->calculateTotalPrice($musician, $bookingData);
 
-        $this->assertEquals(115, $booking->total_price);
+        $this->assertEquals(115, $priceBreakdown['totalPrice']);
+        $this->assertEquals(15, $priceBreakdown['weekendSurcharge']);
     }
 }
