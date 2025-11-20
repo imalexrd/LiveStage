@@ -24,6 +24,7 @@ class MusicianProfileForm extends Component
     public $travel_radius_miles;
     public $max_travel_distance_miles;
     public $price_per_extra_mile;
+    public $minimum_booking_notice_days;
 
     public $genres;
     public $eventTypes;
@@ -48,6 +49,7 @@ class MusicianProfileForm extends Component
             $this->travel_radius_miles = $profile->travel_radius_miles;
             $this->max_travel_distance_miles = $profile->max_travel_distance_miles;
             $this->price_per_extra_mile = $profile->price_per_extra_mile;
+            $this->minimum_booking_notice_days = $profile->minimum_booking_notice_days;
             $this->selectedGenres = $profile->genres->pluck('id')->toArray();
             $this->selectedEventTypes = $profile->eventTypes->pluck('id')->toArray();
         }

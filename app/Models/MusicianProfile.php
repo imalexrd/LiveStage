@@ -37,6 +37,7 @@ class MusicianProfile extends Model
         'travel_radius_miles',
         'max_travel_distance_miles',
         'price_per_extra_mile',
+        'minimum_booking_notice_days',
     ];
 
     public function manager()

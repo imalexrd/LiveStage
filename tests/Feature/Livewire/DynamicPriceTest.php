@@ -27,19 +27,23 @@ class DynamicPriceTest extends TestCase
             'base_price_per_hour' => 100,
             'max_travel_distance_miles' => 1000,
             'travel_radius_miles' => 1000,
+            'minimum_booking_notice_days' => 1,
         ]);
 
-        // Find a weekend day in the future
-        $date = Carbon::now()->addDay();
+        // Find a weekend day in the future that is not subject to urgency fee
+        $date = Carbon::now()->addDays(7);
         while (!$date->isWeekend()) {
             $date->addDay();
         }
+
+        $appFee = 100 * (config('fees.app_fee_percentage') / 100);
+        $expectedPrice = 115 + $appFee;
 
         Livewire::test(BookingRequestForm::class, ['musicianProfile' => $musician])
             ->set('event_date', $date->toDateString())
             ->set('location_latitude', $musician->latitude)
             ->set('location_longitude', $musician->longitude)
-            ->assertSet('totalPrice', 115)
+            ->assertSet('totalPrice', $expectedPrice)
             ->assertSet('basePrice', 100)
             ->assertSet('weekendSurcharge', 15);
     }

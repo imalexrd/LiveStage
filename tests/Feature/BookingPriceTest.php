@@ -30,7 +30,7 @@ class BookingPriceTest extends TestCase
         ]);
 
         // Find a weekday in the future
-        $date = Carbon::now()->addDay();
+        $date = Carbon::now()->addDays(7);
         while ($date->isWeekend()) {
             $date->addDay();
         }
@@ -46,7 +46,8 @@ class BookingPriceTest extends TestCase
         $bookingService = new BookingService();
         $priceBreakdown = $bookingService->calculateTotalPrice($musician, $bookingData);
 
-        $this->assertEquals(100, $priceBreakdown['totalPrice']);
+        $appFee = 100 * (config('fees.app_fee_percentage') / 100);
+        $this->assertEquals(100 + $appFee, $priceBreakdown['totalPrice']);
         $this->assertEquals(0, $priceBreakdown['weekendSurcharge']);
     }
 
@@ -61,7 +62,7 @@ class BookingPriceTest extends TestCase
         ]);
 
         // Find a weekend day in the future
-        $date = Carbon::now()->addDay();
+        $date = Carbon::now()->addDays(7);
         while (!$date->isWeekend()) {
             $date->addDay();
         }
@@ -77,7 +78,8 @@ class BookingPriceTest extends TestCase
         $bookingService = new BookingService();
         $priceBreakdown = $bookingService->calculateTotalPrice($musician, $bookingData);
 
-        $this->assertEquals(115, $priceBreakdown['totalPrice']);
+        $appFee = 100 * (config('fees.app_fee_percentage') / 100);
+        $this->assertEquals(115 + $appFee, $priceBreakdown['totalPrice']);
         $this->assertEquals(15, $priceBreakdown['weekendSurcharge']);
     }
 
@@ -92,7 +94,7 @@ class BookingPriceTest extends TestCase
         ]);
 
         // Find a Friday in the future
-        $date = Carbon::now()->addDay();
+        $date = Carbon::now()->addDays(7);
         while (!$date->isFriday()) {
             $date->addDay();
         }
@@ -108,7 +110,8 @@ class BookingPriceTest extends TestCase
         $bookingService = new BookingService();
         $priceBreakdown = $bookingService->calculateTotalPrice($musician, $bookingData);
 
-        $this->assertEquals(115, $priceBreakdown['totalPrice']);
+        $appFee = 100 * (config('fees.app_fee_percentage') / 100);
+        $this->assertEquals(115 + $appFee, $priceBreakdown['totalPrice']);
         $this->assertEquals(15, $priceBreakdown['weekendSurcharge']);
     }
 }

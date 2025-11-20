@@ -35,6 +35,14 @@ class BookingService
 
         $validatedData = $validator->validated();
 
+        // Check for minimum booking notice
+        $eventDate = \Carbon\Carbon::parse($validatedData['event_date']);
+        if ($eventDate->isBefore(now()->addDays($musicianProfile->minimum_booking_notice_days))) {
+            throw ValidationException::withMessages([
+                'event_date' => 'This musician requires a minimum of ' . $musicianProfile->minimum_booking_notice_days . ' days notice.',
+            ]);
+        }
+
         $distance = $this->calculateDistance(
             $musicianProfile->latitude,
             $musicianProfile->longitude,
@@ -111,13 +119,25 @@ class BookingService
             }
         }
 
-        $totalPrice = $basePrice + $weekendSurcharge + $travelFee;
+        $urgencyFee = 0;
+        if (isset($data['event_date'])) {
+            $eventDate = \Carbon\Carbon::parse($data['event_date']);
+            if ($eventDate->isBefore(now()->addDays(config('fees.urgency_threshold_days')))) {
+                $urgencyFee = $basePrice * (config('fees.urgency_fee_percentage') / 100);
+            }
+        }
+
+        $appFee = $basePrice * (config('fees.app_fee_percentage') / 100);
+
+        $totalPrice = $basePrice + $weekendSurcharge + $travelFee + $urgencyFee + $appFee;
 
         return [
             'basePrice' => round($basePrice, 2),
             'weekendSurcharge' => round($weekendSurcharge, 2),
             'travelFee' => round($travelFee, 2),
+            'urgencyFee' => round($urgencyFee, 2),
             'totalPrice' => round($totalPrice, 2),
+            'appFee' => round($appFee, 2),
         ];
     }
 }

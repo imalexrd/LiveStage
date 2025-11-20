@@ -45,6 +45,12 @@
                         <span>${{ number_format($this->travelFee, 2) }}</span>
                     </div>
                 @endif
+                @if ($urgencyFee > 0)
+                    <div class="flex justify-between">
+                        <span>Urgency Fee:</span>
+                        <span>${{ number_format($this->urgencyFee, 2) }}</span>
+                    </div>
+                @endif
                 <div class="flex justify-between mt-2 pt-2 border-t border-gray-300 font-bold">
                     <span>Total:</span>
                     <span>${{ number_format($this->totalPrice, 2) }}</span>

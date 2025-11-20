@@ -57,7 +57,8 @@ class MusicianProfileServiceTest extends TestCase
             max_travel_distance_miles: 200,
             price_per_extra_mile: 2.50,
             selectedGenres: null,
-            selectedEventTypes: null
+            selectedEventTypes: null,
+            minimum_booking_notice_days: 1
         );
 
         $this->service->updateProfile($user, $data, [$genre->id], [$eventType->id]);
