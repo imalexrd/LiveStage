@@ -62,6 +62,8 @@ class BookingService
             $travelFee = $extraMiles * $musicianProfile->price_per_extra_mile;
         }
 
+        $this->checkAvailability($musicianProfile, $validatedData['event_date']);
+
         $priceBreakdown = $this->calculateTotalPrice($musicianProfile, $validatedData);
 
         return $client->bookings()->create([
@@ -73,7 +75,23 @@ class BookingService
             'event_details' => $validatedData['event_details'],
             'status' => 'pending',
             'total_price' => $priceBreakdown['totalPrice'],
+            'app_fee' => $priceBreakdown['appFee'],
+            'urgency_fee' => $priceBreakdown['urgencyFee'],
         ]);
+    }
+
+    public function checkAvailability(MusicianProfile $musicianProfile, string $date): void
+    {
+        $isBooked = $musicianProfile->bookings()
+            ->where('event_date', $date)
+            ->whereIn('status', ['confirmed', 'paid', 'accepted'])
+            ->exists();
+
+        if ($isBooked) {
+            throw ValidationException::withMessages([
+                'event_date' => 'The musician is unavailable on this date.',
+            ]);
+        }
     }
 
     /**

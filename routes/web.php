@@ -33,6 +33,18 @@ Route::middleware(['auth'])->group(function () {
     Route::view('bookings', 'bookings')->name('bookings');
     Route::post('/profiles/{musicianProfile}/book', [BookingController::class, 'store'])->name('bookings.store');
     Route::get('/bookings/{booking}', [BookingController::class, 'show'])->name('bookings.show');
+    Route::get('/bookings/{booking}/pay', [BookingController::class, 'pay'])->name('bookings.pay');
     Route::put('/bookings/{booking}/approve', [BookingController::class, 'approve'])->name('bookings.approve');
     Route::put('/bookings/{booking}/reject', [BookingController::class, 'reject'])->name('bookings.reject');
 });
+
+use App\Http\Controllers\StripeConnectController;
+
+Route::middleware(['auth', 'isManager'])->group(function () {
+    Route::get('/stripe/connect', [StripeConnectController::class, 'connect'])->name('stripe.connect');
+    Route::get('/stripe/callback', [StripeConnectController::class, 'callback'])->name('stripe.callback');
+});
+
+use App\Http\Controllers\StripeWebhookController;
+
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handleWebhook'])->name('stripe.webhook');

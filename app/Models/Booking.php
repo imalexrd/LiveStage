@@ -19,6 +19,8 @@ class Booking extends Model
         'event_details',
         'status',
         'total_price',
+        'app_fee',
+        'urgency_fee',
     ];
 
     public function client()
