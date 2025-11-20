@@ -20,6 +20,8 @@ class BookingRequestForm extends Component
     public $basePrice = 0;
     public $weekendSurcharge = 0;
     public $travelFee = 0;
+    public $urgencyFee = 0;
+    public $appFee = 0;
     public $totalPrice = 0;
 
     public function mount()
@@ -66,6 +68,8 @@ class BookingRequestForm extends Component
             $this->location_longitude = null;
             $this->event_details = null;
             $this->travelFee = 0;
+            $this->urgencyFee = 0;
+            $this->appFee = 0;
             $this->totalPrice = $this->musicianProfile->base_price_per_hour;
 
         } catch (ValidationException $e) {
@@ -103,6 +107,8 @@ class BookingRequestForm extends Component
             $this->basePrice = $priceBreakdown['basePrice'];
             $this->weekendSurcharge = $priceBreakdown['weekendSurcharge'];
             $this->travelFee = $priceBreakdown['travelFee'];
+            $this->urgencyFee = $priceBreakdown['urgencyFee'];
+            $this->appFee = $priceBreakdown['appFee'];
             $this->totalPrice = $priceBreakdown['totalPrice'];
         }
     }

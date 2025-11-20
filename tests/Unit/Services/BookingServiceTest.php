@@ -40,6 +40,7 @@ class BookingServiceTest extends TestCase
             'price_per_extra_mile' => 3,
             'latitude' => 34.0522, // Los Angeles
             'longitude' => -118.2437,
+            'minimum_booking_notice_days' => 1,
         ]);
 
         $bookingData = [
@@ -53,7 +54,10 @@ class BookingServiceTest extends TestCase
         $priceBreakdown = $this->bookingService->calculateTotalPrice($musicianProfile, $bookingData);
 
         $eventDate = \Carbon\Carbon::parse($bookingData['event_date']);
-        $expectedPrice = ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) ? 150 * 1.15 : 150;
+        $basePrice = 150;
+        $weekendSurcharge = ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) ? $basePrice * 0.15 : 0;
+        $appFee = $basePrice * (config('fees.app_fee_percentage') / 100);
+        $expectedPrice = $basePrice + $weekendSurcharge + $appFee;
 
         $this->assertEquals(round($expectedPrice, 2), $priceBreakdown['totalPrice']);
     }
@@ -81,8 +85,11 @@ class BookingServiceTest extends TestCase
         $priceBreakdown = $this->bookingService->calculateTotalPrice($musicianProfile, $bookingData);
 
         $eventDate = \Carbon\Carbon::parse($bookingData['event_date']);
-        $basePrice = ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) ? 200 * 1.15 : 200;
-        $expectedPrice = $basePrice + (81 - 50) * 2;
+        $basePrice = 200;
+        $weekendSurcharge = ($eventDate->isFriday() || $eventDate->isSaturday() || $eventDate->isSunday()) ? $basePrice * 0.15 : 0;
+        $travelFee = (81 - 50) * 2;
+        $appFee = $basePrice * (config('fees.app_fee_percentage') / 100);
+        $expectedPrice = $basePrice + $weekendSurcharge + $travelFee + $appFee;
 
         $this->assertEqualsWithDelta($expectedPrice, $priceBreakdown['totalPrice'], 1.0); // Allow a tolerance of 1.0
     }

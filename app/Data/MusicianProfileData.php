@@ -21,6 +21,7 @@ class MusicianProfileData extends Data
         public ?float $price_per_extra_mile,
         public ?array $selectedGenres,
         public ?array $selectedEventTypes,
+        public ?int $minimum_booking_notice_days,
     ) {}
 
     public static function rules(): array
@@ -37,6 +38,7 @@ class MusicianProfileData extends Data
             'price_per_extra_mile' => ['nullable', 'numeric', 'min:0'],
             'selectedGenres' => ['nullable', 'array'],
             'selectedEventTypes' => ['nullable', 'array'],
+            'minimum_booking_notice_days' => ['nullable', 'integer', 'min:0'],
         ];
     }
 }

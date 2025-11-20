@@ -50,6 +50,12 @@
         </div>
 
         <div class="mt-4">
+            <x-input-label for="minimum_booking_notice_days" :value="__('Minimum Booking Notice (Days)')" />
+            <x-text-input wire:model="minimum_booking_notice_days" id="minimum_booking_notice_days" class="block mt-1 w-full" type="number" name="minimum_booking_notice_days" step="1" />
+            @error('minimum_booking_notice_days') <span class="text-danger">{{ $message }}</span> @enderror
+        </div>
+
+        <div class="mt-4">
             <x-input-label :value="__('Genres')" />
             <div class="grid grid-cols-2 md:grid-cols-3 gap-2">
                 @foreach($genres as $genre)

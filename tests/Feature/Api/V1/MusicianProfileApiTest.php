@@ -40,6 +40,7 @@ class MusicianProfileApiTest extends TestCase
             'base_price_per_hour' => 100.00,
             'latitude' => 34.0522,
             'longitude' => -118.2437,
+            'minimum_booking_notice_days' => 2,
         ];
 
         $response = $this->actingAs($manager, 'sanctum')->postJson('/api/v1/musicians', $profileData);
@@ -86,6 +87,7 @@ class MusicianProfileApiTest extends TestCase
             'base_price_per_hour' => 200.00,
             'latitude' => 35.0522,
             'longitude' => -119.2437,
+            'minimum_booking_notice_days' => 5,
             'selectedGenres' => $genres->pluck('id')->toArray(),
             'selectedEventTypes' => $eventTypes->pluck('id')->toArray(),
         ];
