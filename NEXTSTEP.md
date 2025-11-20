@@ -1,37 +1,59 @@
-# Próximo Objetivo: Mejorar la Experiencia de Booking y Precios Dinámicos
+# Próximo Objetivo: Integración de Pagos con Stripe Connect
 
 ## Prompt para el Agente de IA
 
-"Hola. Tu próxima tarea es mejorar la robustez del formulario de booking y expandir el sistema de precios dinámicos antes de pasar a la integración de Stripe.
+"Hola. La siguiente fase crítica del proyecto es integrar un sistema de pagos robusto y escalable utilizando Stripe Connect. Esto permitirá a la plataforma manejar transacciones de manera segura, automatizar el flujo de pagos entre clientes y músicos, y cobrar una comisión por el servicio.
 
-**Fase 1: Mejorar la Experiencia de Usuario (UX) del Formulario de Booking**
+**Fase 1: Onboarding de Managers con Stripe Connect**
 
-1.  **Corregir el Flujo de Actualización de Precios:**
-    *   **Problema:** Actualmente, el precio no se recalcula si el usuario selecciona una ubicación *antes* de seleccionar una fecha.
-    *   **Solución:** Modifica el componente Livewire `BookingRequestForm` para que el precio se actualice correctamente sin importar el orden en que se llenen los campos. Una posible solución es forzar al usuario a seleccionar una fecha primero, deshabilitando el selector de ubicación hasta que la fecha esté presente.
-    *   **Prueba:** Añade un test de Livewire que simule el llenado del formulario en un orden "incorrecto" y verifique que el precio final es el correcto.
+1.  **Instalación y Configuración:**
+    *   Instala el SDK oficial de Stripe para PHP (`stripe/stripe-php`).
+    *   Añade las claves de API de Stripe (pública, secreta) al archivo `.env` y crea una entrada de configuración en `config/services.php`.
 
-**Fase 2: Implementar Precios Dinámicos Avanzados**
-
-1.  **Configuración de Antelación Mínima por Músico:**
-    *   **Requerimiento:** Los managers deben poder configurar con cuántos días de antelación mínimo se puede reservar a un músico (ej. 1 día, 7 días).
+2.  **Crear Cuentas Conectadas (Standard):**
+    *   **Requerimiento:** Los managers necesitan conectar su cuenta de Stripe a la plataforma para poder recibir pagos. Utilizaremos el flujo de "Cuentas Conectadas Standard" (Standard Connected Accounts).
     *   **Implementación:**
-        *   Añade una columna `minimum_booking_notice_days` (integer, default 1) a la tabla `musician_profiles`.
-        *   Actualiza el `MusicianProfileForm` para que los managers puedan editar este valor.
-        *   Modifica la validación en el `BookingService` para que `createBooking` falle si la fecha del evento no cumple con la antelación mínima requerida.
+        *   En el dashboard del manager, añade un botón "Conectar con Stripe".
+        *   Este botón debe redirigir al manager al flujo de onboarding de Stripe, pasando la URL de retorno a nuestra plataforma.
+        *   Crea una ruta y un método en un controlador (ej. `StripeConnectController`) para manejar el callback de Stripe.
+        *   Cuando el manager complete el onboarding, Stripe lo redirigirá de vuelta. En el método de callback, guarda el `stripe_connect_id` (que empieza con `acct_...`) en la tabla `musician_profiles`.
+        *   Muestra el estado de la conexión en el dashboard del manager (ej. "Conectado" o "No Conectado").
 
-2.  **Tarifa de Urgencia para Bookings de Último Minuto:**
-    *   **Requerimiento:** La plataforma debe poder cobrar una tarifa extra para bookings realizados con poca antelación (ej. para el día siguiente).
-    *   **Implementación:**
-        *   Añade una configuración en `config/fees.php` para la "tarifa de urgencia" (ej. `urgency_fee_percentage` = 10, `urgency_threshold_days` = 1).
-        *   En el `BookingService`, dentro de `calculateTotalPrice`, añade la tarifa de urgencia al `totalPrice` si la fecha del evento está dentro del umbral definido.
-        *   Asegúrate de que la tarifa de urgencia se muestre en el desglose de precios.
+**Fase 2: Flujo de Pago del Cliente (Direct Charges)**
 
-3.  **Comisión de la Aplicación Variable (App Fee):**
-    *   **Requerimiento:** Prepara el sistema para una futura integración con Stripe Connect, donde la comisión de la plataforma (`app_fee`) pueda ser variable.
+1.  **Iniciar el Proceso de Pago:**
+    *   **Requerimiento:** Una vez que un manager confirma una solicitud de booking, el cliente debe poder pagar para finalizar la reserva.
     *   **Implementación:**
-        *   En el `BookingService`, la lógica de `calculateTotalPrice` debe devolver también un valor `app_fee`.
-        *   Por ahora, la `app_fee` puede ser un porcentaje fijo del `basePrice` y la `weekendSurcharge` (ej. 15%).
-        *   A futuro, este cálculo podrá incluir factores como el nivel del músico, si es un booking de último minuto, etc.
-        *   **Nota:** No es necesario mostrar la `app_fee` al cliente en el desglose de precios, pero sí debe ser parte del objeto de precio devuelto por el servicio.
+        *   En la página de detalles del booking (para el cliente), si el estado es `confirmed`, muestra un botón de "Pagar Ahora".
+
+2.  **Integrar Stripe Checkout:**
+    *   **Requerimiento:** Utilizaremos Stripe Checkout para ofrecer una experiencia de pago segura y preconstruida.
+    *   **Implementación:**
+        *   Al hacer clic en "Pagar Ahora", el backend debe crear una **Sesión de Checkout de Stripe**.
+        *   **Configuración Clave de la Sesión:**
+            *   `payment_method_types`: `['card']`
+            *   `line_items`: Debe incluir el nombre del artista y el `total_price` del booking.
+            *   `mode`: `'payment'`
+            *   `success_url` y `cancel_url`: Rutas en nuestra aplicación para manejar el resultado.
+            *   **`payment_intent_data`**: Aquí es donde se define el flujo de Connect.
+                *   `application_fee_amount`: El valor de `app_fee` (en centavos) que la plataforma cobrará.
+                *   `transfer_data[destination]`: El `stripe_connect_id` del músico que recibirá el pago.
+        *   Redirige al cliente a la URL de la sesión de Checkout generada por Stripe.
+
+**Fase 3: Manejo de Webhooks y Post-Pago**
+
+1.  **Crear un Endpoint de Webhooks:**
+    *   **Requerimiento:** La aplicación debe escuchar eventos de Stripe para actualizar el estado de los bookings y pagos de forma fiable.
+    *   **Implementación:**
+        *   Crea una nueva ruta (ej. `POST /stripe/webhooks`) y un método en el `StripeConnectController` para manejar los webhooks entrantes.
+        *   Añade la ruta al array `$except` en el middleware `VerifyCsrfToken`.
+        *   Implementa la verificación de la firma del webhook usando el "secreto del endpoint de webhook" de Stripe para garantizar que la solicitud es auténtica.
+
+2.  **Manejar el Evento `checkout.session.completed`:**
+    *   **Requerimiento:** Cuando un pago se completa con éxito, debemos actualizar el estado del booking y registrar el pago.
+    *   **Implementación:**
+        *   En el manejador de webhooks, escucha específicamente el evento `checkout.session.completed`.
+        *   Recupera el objeto de la sesión del evento. Usa metadatos en la sesión de checkout para vincularla con el `booking_id` de nuestra aplicación.
+        *   Actualiza el estado del `Booking` a `paid` o `confirmed` (decidir cuál es más apropiado).
+        *   Crea un nuevo registro en la tabla `payments` con el ID de la transacción de Stripe, el monto y el estado.
 "
