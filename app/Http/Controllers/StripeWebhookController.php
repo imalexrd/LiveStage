@@ -6,21 +6,17 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 use Stripe\Webhook;
-use App\Models\Booking;
-use App\Models\Payment;
+use App\Services\StripePaymentService;
 
 class StripeWebhookController extends Controller
 {
-    public function handleWebhook(Request $request)
+    public function handleWebhook(Request $request, StripePaymentService $paymentService)
     {
         $payload = $request->getContent();
         $sig_header = $request->header('Stripe-Signature');
         $endpoint_secret = env('STRIPE_WEBHOOK_SECRET');
 
         if (!$endpoint_secret) {
-             // If no secret set (dev), skip signature verification OR just warn.
-             // For security, verification is mandatory in prod.
-             // For this task, we'll assume it's configured or fail.
              Log::warning('STRIPE_WEBHOOK_SECRET not set.');
         }
 
@@ -43,40 +39,10 @@ class StripeWebhookController extends Controller
 
         if ($event->type == 'checkout.session.completed') {
             $session = $event->data->object;
-            $this->handleCheckoutSessionCompleted($session);
+            $paymentService->handlePaymentSuccess($session->id);
+            Log::info('Stripe Webhook: Handled payment success', ['session_id' => $session->id]);
         }
 
         return response()->json(['status' => 'success']);
-    }
-
-    protected function handleCheckoutSessionCompleted($session)
-    {
-        $bookingId = $session->metadata->booking_id ?? null;
-
-        if (!$bookingId) {
-            Log::error('Stripe Webhook: Booking ID not found in metadata', ['session_id' => $session->id]);
-            return;
-        }
-
-        $booking = Booking::find($bookingId);
-        if (!$booking) {
-             Log::error('Stripe Webhook: Booking not found', ['booking_id' => $bookingId]);
-             return;
-        }
-
-        // Update Booking Status to 'confirmed' (Paid)
-        $booking->status = 'confirmed';
-        $booking->save();
-
-        // Create Payment Record
-        Payment::create([
-            'booking_id' => $booking->id,
-            'stripe_payment_intent_id' => $session->payment_intent,
-            'amount' => $session->amount_total / 100, // Stripe uses cents
-            'currency' => $session->currency,
-            'status' => 'succeeded',
-        ]);
-
-        Log::info('Booking confirmed via Stripe Webhook', ['booking_id' => $booking->id]);
     }
 }

@@ -5,6 +5,8 @@ namespace App\Services;
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
 use App\Models\Booking;
+use App\Models\Payment;
+use Illuminate\Support\Facades\Log;
 
 class StripePaymentService
 {
@@ -38,10 +40,8 @@ class StripePaymentService
                 'quantity' => 1,
             ]],
             'mode' => 'payment',
-            // We redirect to a generic success page or the booking page.
-            // The webhook will update the status.
-            // We add a query param so the UI can show a "Processing Payment" message.
-            'success_url' => route('bookings.show', $booking->id) . '?payment_success=true',
+            // We append session_id for manual verification on return
+            'success_url' => route('bookings.show', $booking->id) . '?payment_success=true&session_id={CHECKOUT_SESSION_ID}',
             'cancel_url' => route('musician.profile.show', $musician->uuid),
             'payment_intent_data' => [
                 'application_fee_amount' => $appFeeCents,
@@ -55,5 +55,50 @@ class StripePaymentService
         ]);
 
         return $session;
+    }
+
+    public function handlePaymentSuccess(string $sessionId)
+    {
+        try {
+            $session = Session::retrieve($sessionId);
+        } catch (\Exception $e) {
+            Log::error('Stripe Payment: Unable to retrieve session', ['session_id' => $sessionId, 'error' => $e->getMessage()]);
+            return null;
+        }
+
+        if ($session->payment_status !== 'paid') {
+            return null;
+        }
+
+        $bookingId = $session->metadata->booking_id ?? null;
+        if (!$bookingId) {
+            Log::error('Stripe Payment: Booking ID not found in metadata', ['session_id' => $sessionId]);
+            return null;
+        }
+
+        $booking = Booking::find($bookingId);
+        if (!$booking) {
+             Log::error('Stripe Payment: Booking not found', ['booking_id' => $bookingId]);
+             return null;
+        }
+
+        if ($booking->status !== 'confirmed') {
+            $booking->status = 'confirmed';
+            $booking->save();
+        }
+
+        // Idempotent Payment Record Creation
+        $payment = Payment::where('stripe_payment_intent_id', $session->payment_intent)->first();
+        if (!$payment) {
+            Payment::create([
+                'booking_id' => $booking->id,
+                'stripe_payment_intent_id' => $session->payment_intent,
+                'amount' => $session->amount_total / 100,
+                'currency' => $session->currency,
+                'status' => 'succeeded',
+            ]);
+        }
+
+        return $booking;
     }
 }

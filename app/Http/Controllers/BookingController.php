@@ -42,9 +42,22 @@ class BookingController extends Controller
         }
     }
 
-    public function show(Booking $booking)
+    public function show(Request $request, Booking $booking, StripePaymentService $paymentService)
     {
         $this->authorize('view', $booking);
+
+        if ($request->has('session_id') && $booking->status === 'pending') {
+            try {
+                $updatedBooking = $paymentService->handlePaymentSuccess($request->session_id);
+                if ($updatedBooking) {
+                    session()->flash('success', 'Payment confirmed successfully!');
+                    $booking->refresh();
+                }
+            } catch (\Exception $e) {
+                // Log error but show booking
+            }
+        }
+
         return view('bookings.show', compact('booking'));
     }
 
