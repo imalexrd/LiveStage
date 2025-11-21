@@ -30,6 +30,7 @@ class User extends Authenticatable implements FilamentUser
         'password',
         'google_id',
         'role',
+        'stripe_customer_id',
     ];
 
     public function musicianProfile()

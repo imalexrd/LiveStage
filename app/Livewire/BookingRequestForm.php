@@ -4,6 +4,7 @@ namespace App\Livewire;
 
 use App\Models\MusicianProfile;
 use App\Services\BookingService;
+use App\Services\StripePaymentService;
 use Illuminate\Validation\ValidationException;
 use Livewire\Component;
 use Livewire\Attributes\On;
@@ -47,7 +48,7 @@ class BookingRequestForm extends Component
         $this->calculatePrice();
     }
 
-    public function submit(BookingService $bookingService)
+    public function submit(BookingService $bookingService, StripePaymentService $stripePaymentService)
     {
         $data = [
             'event_date' => $this->event_date,
@@ -58,19 +59,11 @@ class BookingRequestForm extends Component
         ];
 
         try {
-            $bookingService->createBooking(auth()->user(), $this->musicianProfile, $data);
+            $booking = $bookingService->createBooking(auth()->user(), $this->musicianProfile, $data);
 
-            $this->dispatch('booking-success');
+            $session = $stripePaymentService->createCheckoutSession($booking);
 
-            $this->event_date = null;
-            $this->location_address = null;
-            $this->location_latitude = null;
-            $this->location_longitude = null;
-            $this->event_details = null;
-            $this->travelFee = 0;
-            $this->urgencyFee = 0;
-            $this->appFee = 0;
-            $this->totalPrice = $this->musicianProfile->base_price_per_hour;
+            return redirect($session->url);
 
         } catch (ValidationException $e) {
             $this->addError('form', $e->getMessage());
@@ -79,6 +72,8 @@ class BookingRequestForm extends Component
                     $this->addError($field, $message);
                 }
             }
+        } catch (\Exception $e) {
+            $this->addError('form', 'An error occurred: ' . $e->getMessage());
         }
     }
 

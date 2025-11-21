@@ -4,40 +4,60 @@ namespace App\Http\Controllers;
 
 use App\Models\Booking;
 use App\Models\MusicianProfile;
+use App\Services\BookingService;
+use App\Services\StripePaymentService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class BookingController extends Controller
 {
-    public function store(Request $request, MusicianProfile $musicianProfile)
+    public function pay(Booking $booking, StripePaymentService $paymentService, BookingService $bookingService)
     {
-        $request->validate([
-            'event_date' => 'required|date|after:today',
-            'location_address' => 'required|string|max:255',
-            'location_latitude' => 'required|numeric',
-            'location_longitude' => 'required|numeric',
-            'event_details' => 'required|string',
-        ]);
+        if (Auth::id() !== $booking->client_id) {
+            abort(403);
+        }
 
-        $booking = new Booking();
-        $booking->client_id = Auth::id();
-        $booking->musician_profile_id = $musicianProfile->id;
-        $booking->event_date = $request->event_date;
-        $booking->location_address = $request->location_address;
-        $booking->location_latitude = $request->location_latitude;
-        $booking->location_longitude = $request->location_longitude;
-        $booking->event_details = $request->event_details;
-        $booking->status = 'pending';
-        $booking->save();
+        try {
+            // Re-check availability
+            $bookingService->checkAvailability($booking->musicianProfile, $booking->event_date);
 
-        // TODO: Add notification to manager
-
-        return back()->with('success', 'Booking request sent successfully!');
+            $session = $paymentService->createCheckoutSession($booking);
+            return redirect($session->url);
+        } catch (ValidationException $e) {
+            return back()->with('error', 'Booking unavailable: ' . $e->getMessage());
+        } catch (\Exception $e) {
+            return back()->with('error', $e->getMessage());
+        }
     }
 
-    public function show(Booking $booking)
+    public function store(Request $request, MusicianProfile $musicianProfile, BookingService $bookingService)
+    {
+        try {
+            $bookingService->createBooking(Auth::user(), $musicianProfile, $request->all());
+
+            return back()->with('success', 'Booking request sent successfully!');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        }
+    }
+
+    public function show(Request $request, Booking $booking, StripePaymentService $paymentService)
     {
         $this->authorize('view', $booking);
+
+        if ($request->has('session_id') && $booking->status === 'pending') {
+            try {
+                $updatedBooking = $paymentService->handlePaymentSuccess($request->session_id);
+                if ($updatedBooking) {
+                    session()->flash('success', 'Payment confirmed successfully!');
+                    $booking->refresh();
+                }
+            } catch (\Exception $e) {
+                // Log error but show booking
+            }
+        }
+
         return view('bookings.show', compact('booking'));
     }
 
