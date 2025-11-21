@@ -4,8 +4,11 @@ namespace App\Services;
 
 use Stripe\Stripe;
 use Stripe\Checkout\Session;
+use Stripe\Account;
+use Stripe\AccountLink;
 use App\Models\Booking;
 use App\Models\Payment;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 
 class StripePaymentService
@@ -13,6 +16,38 @@ class StripePaymentService
     public function __construct()
     {
         Stripe::setApiKey(env('STRIPE_SECRET'));
+    }
+
+    public function createAccountLink(User $user): string
+    {
+        if ($user->role !== 'manager') {
+            throw new \Exception('Only managers can connect Stripe accounts.');
+        }
+
+        $profile = $user->musicianProfile;
+
+        if (!$profile) {
+            throw new \Exception('You must create a musician profile first.');
+        }
+
+        if (!$profile->stripe_connect_id) {
+            $account = Account::create([
+                'type' => 'standard',
+                'email' => $user->email,
+            ]);
+
+            $profile->stripe_connect_id = $account->id;
+            $profile->save();
+        }
+
+        $accountLink = AccountLink::create([
+            'account' => $profile->stripe_connect_id,
+            'refresh_url' => route('stripe.connect'),
+            'return_url' => route('stripe.callback'),
+            'type' => 'account_onboarding',
+        ]);
+
+        return $accountLink->url;
     }
 
     public function createCheckoutSession(Booking $booking)
