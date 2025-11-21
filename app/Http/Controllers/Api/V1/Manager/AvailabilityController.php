@@ -3,25 +3,25 @@
 namespace App\Http\Controllers\Api\V1\Manager;
 
 use App\Http\Controllers\Controller;
-use App\Models\Availability;
 use App\Data\StoreAvailabilityData;
+use App\Services\AvailabilityService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\ValidationException;
 
 class AvailabilityController extends Controller
 {
+    public function __construct(protected AvailabilityService $availabilityService)
+    {}
+
     public function index(Request $request)
     {
         $user = $request->user();
-        // Ideally use Policy, but check role here for simplicity as per previous pattern
         if ($user->role !== 'manager' || !$user->musicianProfile) {
              return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $availabilities = $user->musicianProfile->availabilities()
-            ->where('unavailable_date', '>=', now()->toDateString())
-            ->orderBy('unavailable_date')
-            ->get();
+        $availabilities = $this->availabilityService->getFutureAvailabilities($user->musicianProfile);
 
         return response()->json($availabilities);
     }
@@ -33,19 +33,19 @@ class AvailabilityController extends Controller
              return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $profile = $user->musicianProfile;
-
-        // Check if already blocked
-        if ($profile->availabilities()->where('unavailable_date', $data->unavailable_date)->exists()) {
-            return response()->json(['error' => 'Date is already blocked.'], 422);
+        try {
+            $availability = $this->availabilityService->blockDate(
+                $user->musicianProfile,
+                $data->unavailable_date,
+                $data->reason
+            );
+            return response()->json($availability, 201);
+        } catch (ValidationException $e) {
+            // The prompt's original controller returned 422 with a custom message.
+            // ValidationException usually returns 422 automatically, but let's match the format if needed.
+            // Ideally we let Laravel handle it, but previous code did explicit check.
+            return response()->json(['error' => $e->validator->errors()->first()], 422);
         }
-
-        $availability = $profile->availabilities()->create([
-            'unavailable_date' => $data->unavailable_date,
-            'reason' => $data->reason,
-        ]);
-
-        return response()->json($availability, 201);
     }
 
     public function destroy(Request $request, $id)
@@ -55,14 +55,11 @@ class AvailabilityController extends Controller
              return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        $availability = $user->musicianProfile->availabilities()->find($id);
-
-        if (!$availability) {
+        try {
+            $this->availabilityService->unblockDate($user->musicianProfile, $id);
+            return response()->json(['message' => 'Availability deleted successfully.']);
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
             return response()->json(['error' => 'Availability not found.'], 404);
         }
-
-        $availability->delete();
-
-        return response()->json(['message' => 'Availability deleted successfully.']);
     }
 }

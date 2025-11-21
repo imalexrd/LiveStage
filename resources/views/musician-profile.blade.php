@@ -81,6 +81,17 @@
                     <livewire:multimedia-manager />
                 </div>
             </div>
+
+            <!-- Availability Calendar Card -->
+            <div class="bg-white overflow-hidden shadow-md rounded-lg">
+                 <div class="p-6 border-b border-gray-200">
+                    <h3 class="text-lg font-semibold text-gray-900">Availability Calendar</h3>
+                    <p class="mt-1 text-sm text-gray-600">Manage your availability and view bookings.</p>
+                </div>
+                <div class="p-6">
+                    <livewire:availability-calendar />
+                </div>
+            </div>
         </div>
     </div>
     <livewire:location-picker-modal />
