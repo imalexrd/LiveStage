@@ -186,3 +186,114 @@ Para probar todo el flujo (Onboarding y Pagos) localmente, necesitas recibir los
 
 ### 6.5. Verificación de Pagos (Mecanismo de Respaldo)
 El sistema implementa una verificación redundante. Además del Webhook, cuando el usuario es redirigido de vuelta a la aplicación tras el pago, el `BookingController` verifica el estado de la sesión de Stripe usando el parámetro `session_id`. Esto garantiza que la reserva se confirme inmediatamente incluso si el Webhook falla o se retrasa en el entorno local.
+
+---
+
+## 7. Documentación de Nuevos Endpoints (API Pagos y Disponibilidad)
+
+### 7.1. API de Pagos
+
+#### Onboarding de Manager (Stripe Connect)
+*   **Endpoint:** `GET /api/v1/manager/stripe/connect`
+*   **Headers:** `Authorization: Bearer <token>`
+*   **Descripción:** Genera una URL de Stripe Connect para que el manager complete su registro.
+*   **Ejemplo curl:**
+    ```bash
+    curl -X GET "http://127.0.0.1:8000/api/v1/manager/stripe/connect" \
+         -H "Authorization: Bearer 1|..." \
+         -H "Accept: application/json"
+    ```
+*   **Respuesta Exitosa (200):**
+    ```json
+    {
+        "url": "https://connect.stripe.com/setup/..."
+    }
+    ```
+
+#### Pago de Booking (Cliente)
+*   **Endpoint:** `POST /api/v1/bookings/{bookingId}/pay`
+*   **Headers:** `Authorization: Bearer <token>`
+*   **Descripción:** Crea una sesión de pago de Stripe para un booking confirmado.
+*   **Ejemplo curl:**
+    ```bash
+    curl -X POST "http://127.0.0.1:8000/api/v1/bookings/1/pay" \
+         -H "Authorization: Bearer 1|..." \
+         -H "Accept: application/json"
+    ```
+*   **Respuesta Exitosa (200):**
+    ```json
+    {
+        "checkout_url": "https://checkout.stripe.com/c/pay/..."
+    }
+    ```
+
+### 7.2. API de Gestión de Disponibilidad (Manager)
+
+#### Listar Fechas No Disponibles
+*   **Endpoint:** `GET /api/v1/manager/availability`
+*   **Headers:** `Authorization: Bearer <token>`
+*   **Descripción:** Lista las fechas futuras bloqueadas por el manager.
+*   **Ejemplo curl:**
+    ```bash
+    curl -X GET "http://127.0.0.1:8000/api/v1/manager/availability" \
+         -H "Authorization: Bearer 1|..." \
+         -H "Accept: application/json"
+    ```
+*   **Respuesta Exitosa (200):**
+    ```json
+    [
+        {
+            "id": 1,
+            "musician_profile_id": 1,
+            "unavailable_date": "2025-12-25",
+            "reason": "Navidad",
+            "created_at": "...",
+            "updated_at": "..."
+        }
+    ]
+    ```
+
+#### Bloquear una Fecha
+*   **Endpoint:** `POST /api/v1/manager/availability`
+*   **Headers:** `Authorization: Bearer <token>`, `Content-Type: application/json`
+*   **Body:**
+    ```json
+    {
+        "unavailable_date": "2025-12-25",
+        "reason": "Navidad"
+    }
+    ```
+*   **Ejemplo curl:**
+    ```bash
+    curl -X POST "http://127.0.0.1:8000/api/v1/manager/availability" \
+         -H "Authorization: Bearer 1|..." \
+         -H "Content-Type: application/json" \
+         -d '{"unavailable_date": "2025-12-25", "reason": "Navidad"}'
+    ```
+*   **Respuesta Exitosa (201):**
+    ```json
+    {
+        "id": 2,
+        "musician_profile_id": 1,
+        "unavailable_date": "2025-12-25",
+        "reason": "Navidad",
+        "created_at": "...",
+        "updated_at": "..."
+    }
+    ```
+
+#### Desbloquear una Fecha
+*   **Endpoint:** `DELETE /api/v1/manager/availability/{id}`
+*   **Headers:** `Authorization: Bearer <token>`
+*   **Ejemplo curl:**
+    ```bash
+    curl -X DELETE "http://127.0.0.1:8000/api/v1/manager/availability/1" \
+         -H "Authorization: Bearer 1|..." \
+         -H "Accept: application/json"
+    ```
+*   **Respuesta Exitosa (200):**
+    ```json
+    {
+        "message": "Availability deleted successfully."
+    }
+    ```

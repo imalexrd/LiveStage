@@ -92,6 +92,16 @@ class BookingService
                 'event_date' => 'The musician is unavailable on this date.',
             ]);
         }
+
+        $isBlocked = $musicianProfile->availabilities()
+            ->where('unavailable_date', $date)
+            ->exists();
+
+        if ($isBlocked) {
+            throw ValidationException::withMessages([
+                'event_date' => 'The musician has blocked this date.',
+            ]);
+        }
     }
 
     /**

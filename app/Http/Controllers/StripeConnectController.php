@@ -6,49 +6,23 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
 use Stripe\Account;
-use Stripe\AccountLink;
+use App\Services\StripePaymentService;
 
 class StripeConnectController extends Controller
 {
-    public function __construct()
+    protected $stripeService;
+
+    public function __construct(StripePaymentService $stripeService)
     {
+        $this->stripeService = $stripeService;
         Stripe::setApiKey(env('STRIPE_SECRET'));
     }
 
     public function connect()
     {
-        $user = Auth::user();
-
-        if ($user->role !== 'manager') {
-             abort(403, 'Only managers can connect Stripe accounts.');
-        }
-
-        $profile = $user->musicianProfile;
-
-        if (!$profile) {
-            return redirect()->route('musician.profile')->with('error', 'You must create a musician profile first.');
-        }
-
         try {
-            if (!$profile->stripe_connect_id) {
-                $account = Account::create([
-                    'type' => 'standard',
-                    'email' => $user->email,
-                ]);
-
-                $profile->stripe_connect_id = $account->id;
-                $profile->save();
-            }
-
-            $accountLink = AccountLink::create([
-                'account' => $profile->stripe_connect_id,
-                'refresh_url' => route('stripe.connect'),
-                'return_url' => route('stripe.callback'),
-                'type' => 'account_onboarding',
-            ]);
-
-            return redirect($accountLink->url);
-
+            $url = $this->stripeService->createAccountLink(Auth::user());
+            return redirect($url);
         } catch (\Exception $e) {
             return redirect()->route('musician.profile')->with('error', 'Error connecting to Stripe: ' . $e->getMessage());
         }
