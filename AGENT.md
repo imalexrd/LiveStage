@@ -183,3 +183,6 @@ Para probar todo el flujo (Onboarding y Pagos) localmente, necesitas recibir los
     -   En la pasarela de pago de Stripe, usa una tarjeta de prueba (ej. `4242 4242 4242 4242`, cualquier fecha futura, cualquier CVC).
     -   Al completar el pago, serás redirigido a la app.
     -   Si el Webhook se procesó correctamente (gracias a `stripe listen`), el estado del booking cambiará automáticamente a `confirmed`.
+
+### 6.5. Verificación de Pagos (Mecanismo de Respaldo)
+El sistema implementa una verificación redundante. Además del Webhook, cuando el usuario es redirigido de vuelta a la aplicación tras el pago, el `BookingController` verifica el estado de la sesión de Stripe usando el parámetro `session_id`. Esto garantiza que la reserva se confirme inmediatamente incluso si el Webhook falla o se retrasa en el entorno local.
