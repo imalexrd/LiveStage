@@ -16,6 +16,10 @@ class Availability extends Model
         'reason',
     ];
 
+    protected $casts = [
+        'unavailable_date' => 'date',
+    ];
+
     public function musicianProfile()
     {
         return $this->belongsTo(MusicianProfile::class);
